@@ -13,8 +13,15 @@ const initialPreset = () => {
     console.log(presetColor);
     updatePreset(presetColor);
 };
+
+const initialSurface = () => {
+    const surfacePalette = surfaces.value.find((s) => s.name === settingService.getSurfaceTheme())?.palette;
+    updateSurfacePalette(surfacePalette);
+};
+
 onBeforeMount(() => {
     document.documentElement.classList.toggle('app-dark');
+    initialSurface();
     initialPreset();
 });
 </script>
