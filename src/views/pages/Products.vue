@@ -156,9 +156,6 @@ function getStatusLabel(status) {
                         </IconField>
                     </div>
                 </template>
-
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-
                 <Column field="productId" header="ID" sortable style="min-width: 16rem"></Column>
                 <Column field="name" header="Name" sortable style="min-width: 16rem"></Column>
 
