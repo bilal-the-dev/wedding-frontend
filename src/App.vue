@@ -1,6 +1,6 @@
 <script setup>
 import { SettingService } from '@/service/SettingsService';
-import { updatePreset } from '@primevue/themes';
+import { updatePreset, updateSurfacePalette } from '@primevue/themes';
 import { onBeforeMount } from 'vue';
 
 import { useThemeSetting } from '@/layout/composables/theme';
