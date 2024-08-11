@@ -47,14 +47,10 @@ function saveProduct() {
 
     if (product?.value.name?.trim()) {
         if (product.value.id) {
-            product.value.inventoryStatus = product.value.inventoryStatus.value ? product.value.inventoryStatus.value : product.value.inventoryStatus;
             products.value[findIndexById(product.value.id)] = product.value;
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
         } else {
             product.value.id = createId();
-            product.value.code = createId();
-            product.value.image = 'product-placeholder.svg';
-            product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
             products.value.push(product.value);
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
         }
@@ -148,18 +144,7 @@ function getStatusLabel(status) {
                 </template>
             </Toolbar>
 
-            <DataTable
-                ref="dt"
-                v-model:selection="selectedProducts"
-                :value="products"
-                dataKey="id"
-                :paginator="true"
-                :rows="10"
-                :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-            >
+            <DataTable ref="dt" v-model:selection="selectedProducts" :value="products" dataKey="id" :paginator="true" :rows="10" :filters="filters">
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
                         <h4 class="m-0">Manage Products</h4>
@@ -173,27 +158,14 @@ function getStatusLabel(status) {
                 </template>
 
                 <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="code" header="Code" sortable style="min-width: 12rem"></Column>
+
+                <Column field="productId" header="ID" sortable style="min-width: 16rem"></Column>
                 <Column field="name" header="Name" sortable style="min-width: 16rem"></Column>
-                <Column header="Image">
-                    <template #body="slotProps">
-                        <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" class="rounded" style="width: 64px" />
-                    </template>
-                </Column>
+
+                <Column field="version" header="Version" sortable style="min-width: 16rem"></Column>
                 <Column field="price" header="Price" sortable style="min-width: 8rem">
                     <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.price) }}
-                    </template>
-                </Column>
-                <Column field="category" header="Category" sortable style="min-width: 10rem"></Column>
-                <Column field="rating" header="Reviews" sortable style="min-width: 12rem">
-                    <template #body="slotProps">
-                        <Rating :modelValue="slotProps.data.rating" :readonly="true" />
-                    </template>
-                </Column>
-                <Column field="inventoryStatus" header="Status" sortable style="min-width: 12rem">
-                    <template #body="slotProps">
-                        <Tag :value="slotProps.data.inventoryStatus" :severity="getStatusLabel(slotProps.data.inventoryStatus)" />
                     </template>
                 </Column>
                 <Column :exportable="false" style="min-width: 12rem">
@@ -205,57 +177,27 @@ function getStatusLabel(status) {
             </DataTable>
         </div>
 
-        <Dialog v-model:visible="productDialog" :style="{ width: '450px' }" header="Product Details" :modal="true">
+        <Dialog v-model:visible="productDialog" :style="{ width: '450px' }" header="Add New Product" :modal="true">
             <div class="flex flex-col gap-6">
-                <img v-if="product.image" :src="`https://primefaces.org/cdn/primevue/images/product/${product.image}`" :alt="product.image" class="block m-auto pb-4" />
+                <div>
+                    <label for="id" class="block font-bold mb-3">ID</label>
+                    <InputText id="name" v-model.trim="product.productId" required="true" autofocus :invalid="submitted && !product.productId" fluid />
+                    <small v-if="submitted && !product.productId" class="text-red-500">Id is required.</small>
+                </div>
                 <div>
                     <label for="name" class="block font-bold mb-3">Name</label>
                     <InputText id="name" v-model.trim="product.name" required="true" autofocus :invalid="submitted && !product.name" fluid />
                     <small v-if="submitted && !product.name" class="text-red-500">Name is required.</small>
                 </div>
                 <div>
-                    <label for="description" class="block font-bold mb-3">Description</label>
-                    <Textarea id="description" v-model="product.description" required="true" rows="3" cols="20" fluid />
+                    <label for="version" class="block font-bold mb-3">Version</label>
+                    <Textarea id="version" v-model="product.version" required="true" rows="3" cols="20" fluid />
                 </div>
                 <div>
-                    <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                    <Select id="inventoryStatus" v-model="product.inventoryStatus" :options="statuses" optionLabel="label" placeholder="Select a Status" fluid></Select>
-                </div>
-
-                <div>
-                    <span class="block font-bold mb-4">Category</span>
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="flex items-center gap-2 col-span-6">
-                            <RadioButton id="category1" v-model="product.category" name="category" value="Accessories" />
-                            <label for="category1">Accessories</label>
-                        </div>
-                        <div class="flex items-center gap-2 col-span-6">
-                            <RadioButton id="category2" v-model="product.category" name="category" value="Clothing" />
-                            <label for="category2">Clothing</label>
-                        </div>
-                        <div class="flex items-center gap-2 col-span-6">
-                            <RadioButton id="category3" v-model="product.category" name="category" value="Electronics" />
-                            <label for="category3">Electronics</label>
-                        </div>
-                        <div class="flex items-center gap-2 col-span-6">
-                            <RadioButton id="category4" v-model="product.category" name="category" value="Fitness" />
-                            <label for="category4">Fitness</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-12 gap-4">
-                    <div class="col-span-6">
-                        <label for="price" class="block font-bold mb-3">Price</label>
-                        <InputNumber id="price" v-model="product.price" mode="currency" currency="USD" locale="en-US" fluid />
-                    </div>
-                    <div class="col-span-6">
-                        <label for="quantity" class="block font-bold mb-3">Quantity</label>
-                        <InputNumber id="quantity" v-model="product.quantity" integeronly fluid />
-                    </div>
+                    <label for="price" class="block font-bold mb-3">Price</label>
+                    <InputNumber id="price" v-model="product.price" mode="currency" currency="USD" locale="en-US" fluid />
                 </div>
             </div>
-
             <template #footer>
                 <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
                 <Button label="Save" icon="pi pi-check" @click="saveProduct" />

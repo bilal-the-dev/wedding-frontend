@@ -1,12 +1,12 @@
 .layout-sidebar {
     position: fixed;
-    width: 20rem;
-    height: calc(100vh - 8rem);
+    width: 22rem;
+    height: calc(100vh - 4rem);
     z-index: 999;
     overflow-y: auto;
     user-select: none;
-    top: 6rem;
-    left: 2rem;
+    top: 4rem;
+    left: 0rem;
     transition:
         transform var(--layout-section-transition-duration),
         left var(--layout-section-transition-duration);
@@ -18,8 +18,8 @@
 .layout-menu {
     margin: 0;
     padding: 0;
+    padding-top: 2rem;
     list-style-type: none;
-
     .layout-root-menuitem {
         > .layout-menuitem-root-text {
             font-size: 0.857rem;
@@ -38,6 +38,7 @@
         user-select: none;
 
         &.active-menuitem {
+            background-color: var(--primary-color);
             > .layout-submenu-toggler {
                 transform: rotate(-180deg);
             }
@@ -64,7 +65,7 @@
             outline: 0 none;
             color: var(--text-color);
             cursor: pointer;
-            padding: 0.75rem 1rem;
+            padding: 1.1rem 1rem;
             border-radius: var(--content-border-radius);
             transition:
                 background-color var(--element-transition-duration),
@@ -82,7 +83,7 @@
 
             &.active-route {
                 font-weight: 700;
-                color: var(--primary-color);
+                background-color: var(--primary-color);
             }
 
             &:hover {
