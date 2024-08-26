@@ -73,7 +73,7 @@ export async function deleteProductLicense(licenseId) {
 }
 
 export async function downloadProductFile(productId) {
-    const response = await fetch(`http://localhost:3000/api/v1/products/${productId}/download`, {
+    const response = await fetch(`${import.meta.env.VITE_APP_BACKEND_URL}/products/${productId}/download`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
