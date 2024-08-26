@@ -198,6 +198,7 @@ watch(selectedDropDownProduct, async (newVal, oldVal) => {
                 </template>
 
                 <Column field="productName" header="Product" sortable style="min-width: 12rem"></Column>
+                <Column field="_id" header="License Key" sortable style="min-width: 12rem"></Column>
                 <Column field="discordUsername" header="Client discord" sortable style="min-width: 12rem"></Column>
                 <Column field="clientName" header="client name" sortable style="min-width: 12rem"></Column>
                 <Column field="ipCap" header="IP cap" sortable style="min-width: 10rem"></Column>
