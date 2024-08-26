@@ -7,6 +7,7 @@ const router = createRouter({
         {
             path: '/',
             component: AppLayout,
+            meta: { requiresAuth: true },
             children: [
                 {
                     path: '/',
@@ -22,10 +23,52 @@ const router = createRouter({
                     path: '/pages/license',
                     name: 'license',
                     component: () => import('@/views/pages/License.vue')
+                },
+                {
+                    path: '/pages/profile',
+                    name: 'profile',
+                    component: () => import('@/views/pages/Profile.vue')
+                },
+                {
+                    path: '/pages/admin/license',
+                    name: 'admin-license',
+                    component: () => import('@/views/pages/AdminLicense.vue'),
+                    meta: { requiresAdminLicenseAccess: true }
                 }
             ]
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: () => import('@/views/pages/Login.vue'),
+            meta: { guest: true }
+        },
+        {
+            path: '/auth',
+            name: 'auth',
+            component: () => import('@/views/pages/auth.vue'),
+            meta: { guest: true }
         }
     ]
+});
+
+router.beforeEach((to, from, next) => {
+    const userData = localStorage.getItem('userData');
+    const isAuthenticated = !!userData;
+    const user = userData === 'true';
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+    const isGuestRoute = to.matched.some((record) => record.meta.guest);
+    const requiresAdminLicenseAccess = to.matched.some((record) => record.meta.requiresAdminLicenseAccess);
+
+    if (requiresAuth && !isAuthenticated) {
+        next({ name: 'login' });
+    } else if (isGuestRoute && isAuthenticated) {
+        next({ name: 'dashboard' });
+    } else if (requiresAdminLicenseAccess && isAuthenticated && !user) {
+        next({ path: '/' });
+    } else {
+        next();
+    }
 });
 
 export default router;

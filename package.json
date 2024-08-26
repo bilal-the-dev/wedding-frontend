@@ -8,11 +8,16 @@
         "lint": "eslint --fix . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
     },
     "dependencies": {
+        "@motionone/vue": "^10.16.4",
         "@primevue/themes": "^4.0.0",
+        "@vueuse/motion": "^2.2.3",
+        "axios": "^1.7.5",
+        "canvas-confetti": "^1.9.3",
         "chart.js": "3.3.2",
         "primeicons": "^6.0.1",
         "primevue": "^4.0.0",
         "vue": "^3.4.34",
+        "vue-confetti": "^2.3.0",
         "vue-router": "^4.4.0"
     },
     "devDependencies": {

@@ -4,7 +4,7 @@ import InputNumber from 'primevue/inputnumber';
 import Select from 'primevue/select';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref, watch } from 'vue';
-import { deleteProductLicense, fetchDiscordMembers, fetchProducts, fetchProductsLicenses, saveProductsLicense, updateProductLicense } from '../../service/auth.services';
+import { deleteProductLicense, fetchDiscordMembers, fetchProductAllLicenses, fetchProducts, fetchProductsLicenses, saveProductsLicense, updateProductLicense } from '../../service/auth.services';
 const loader = ref(false);
 const productOptions = ref([
     { name: 'Product A', code: 'PA' },
@@ -80,9 +80,8 @@ async function saveProduct() {
         } else {
             loader.value = true;
             product.value.id = createId();
-            await saveProductsLicense(product.value.product.id, product.value);
-            const data = await fetchProductsLicenses(product.value.product.id);
-            products.value = data.licenses;
+            await saveProductsLicense(product.value.product.productId, product.value);
+            selectedDropDownProduct.value = product.value.product;
             loader.value = false;
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
         }
@@ -166,7 +165,7 @@ function getStatusLabel(status) {
 
 watch(selectedDropDownProduct, async (newVal, oldVal) => {
     loader.value = true;
-    const data = await fetchProductsLicenses(newVal.productId);
+    const data = await fetchProductAllLicenses(newVal.productId);
     products.value = data.licenses;
     loader.value = false;
 });
@@ -176,6 +175,10 @@ watch(selectedDropDownProduct, async (newVal, oldVal) => {
     <div>
         <div class="card">
             <Toolbar class="mb-6">
+                <template #start>
+                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
+                </template>
+
                 <template #end>
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
@@ -200,6 +203,12 @@ watch(selectedDropDownProduct, async (newVal, oldVal) => {
                 <Column field="ipCap" header="IP cap" sortable style="min-width: 10rem"></Column>
                 <Column field="hwidCap" header="Hwid cap" sortable style="min-width: 10rem"></Column>
                 <Column field="note" header="Note" sortable style="min-width: 10rem"></Column>
+                <Column :exportable="false" style="min-width: 12rem">
+                    <template #body="slotProps">
+                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editProduct(slotProps.data)" />
+                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteProduct(slotProps.data)" />
+                    </template>
+                </Column>
             </DataTable>
         </div>
 
