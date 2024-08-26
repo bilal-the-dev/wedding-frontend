@@ -238,7 +238,7 @@ async function downloadProduct(data) {
             <div class="flex flex-col gap-6">
                 <div>
                     <label for="id" class="block font-bold mb-3">ID</label>
-                    <InputText id="name" v-model.trim="product.productId" required="true" autofocus :invalid="submitted && !product.productId" fluid />
+                    <InputText id="name" v-model.trim="product.productId" :disabled="product.id" required="true" autofocus :invalid="submitted && !product.productId" fluid />
                     <small v-if="product.productId" class="text-blue-300">*Id should be unique</small>
                     <small v-if="submitted && !product.productId" class="text-red-500">Id is required.</small>
                 </div>
