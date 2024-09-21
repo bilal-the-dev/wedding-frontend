@@ -15,60 +15,48 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
-                    path: '/pages/products',
-                    name: 'products',
-                    component: () => import('@/views/pages/Products.vue')
+                    path: '/plans',
+                    name: 'plans',
+                    component: () => import('@/views/pages/Plans.vue')
                 },
                 {
-                    path: '/pages/license',
-                    name: 'license',
-                    component: () => import('@/views/pages/License.vue')
+                    path: '/servers',
+                    name: 'servers',
+                    component: () => import('@/views/pages/Server.vue')
                 },
                 {
-                    path: '/pages/profile',
-                    name: 'profile',
-                    component: () => import('@/views/pages/Profile.vue')
+                    path: '/settings',
+                    name: 'settings',
+                    component: () => import('@/views/pages/Settings.vue')
                 },
                 {
-                    path: '/pages/admin/license',
-                    name: 'admin-license',
-                    component: () => import('@/views/pages/AdminLicense.vue'),
-                    meta: { requiresAdminLicenseAccess: true }
+                    path: '/tickets/panels',
+                    name: 'panels',
+                    component: () => import('@/views/pages/tickets/Panels.vue')
+                },
+                {
+                    path: '/tickets/panels/create',
+                    name: 'panelsCreate',
+                    component: () => import('@/views/pages/tickets/PanelsCreate.vue')
+                },
+                {
+                    path: '/tickets/logs',
+                    name: 'TicketLogs',
+                    component: () => import('@/views/pages/tickets/TicketLogs.vue')
+                },
+                {
+                    path: '/autoresponders',
+                    name: 'autoResponders',
+                    component: () => import('@/views/pages/AutoResponser.vue')
+                },
+                {
+                    path: '/autoresponders/create',
+                    name: 'autoRespondersCreate',
+                    component: () => import('@/views/pages/AutoResponserCreate.vue')
                 }
             ]
-        },
-        {
-            path: '/login',
-            name: 'login',
-            component: () => import('@/views/pages/Login.vue'),
-            meta: { guest: true }
-        },
-        {
-            path: '/auth',
-            name: 'auth',
-            component: () => import('@/views/pages/auth.vue'),
-            meta: { guest: true }
         }
     ]
-});
-
-router.beforeEach((to, from, next) => {
-    const userData = localStorage.getItem('userData');
-    const isAuthenticated = !!userData;
-    const user = userData === 'true';
-    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    const isGuestRoute = to.matched.some((record) => record.meta.guest);
-    const requiresAdminLicenseAccess = to.matched.some((record) => record.meta.requiresAdminLicenseAccess);
-
-    if (requiresAuth && !isAuthenticated) {
-        next({ name: 'login' });
-    } else if (isGuestRoute && isAuthenticated) {
-        next({ name: 'dashboard' });
-    } else if (requiresAdminLicenseAccess && isAuthenticated && !user) {
-        next({ path: '/' });
-    } else {
-        next();
-    }
 });
 
 export default router;

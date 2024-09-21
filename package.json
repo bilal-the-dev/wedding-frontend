@@ -18,7 +18,8 @@
         "primevue": "^4.0.0",
         "vue": "^3.4.34",
         "vue-confetti": "^2.3.0",
-        "vue-router": "^4.4.0"
+        "vue-router": "^4.4.0",
+        "vue3-emoji-picker": "^1.1.8"
     },
     "devDependencies": {
         "@primevue/auto-import-resolver": "^4.0.1",

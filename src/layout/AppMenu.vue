@@ -1,66 +1,28 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import AppMenuItem from './AppMenuItem.vue';
 
 // Define your menu items as an array
 const allMenuItems = [
     {
-        items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-    },
-    {
+        label: 'Tickety',
         items: [
-            {
-                label: 'Products',
-                icon: 'pi pi-fw pi-pencil',
-                to: '/pages/products'
-            }
+            { label: 'Overview', icon: 'pi pi-fw pi-eye', to: '/' },
+            { label: 'Plans', icon: 'pi pi-fw pi-credit-card', to: '/plans' },
+            { label: 'Settings', icon: 'pi pi-fw pi-spin pi-cog', to: '/settings' },
+            { label: 'AutoResponder', icon: 'pi pi-fw pi-comment', to: '/autoresponders' }
         ]
     },
     {
+        label: 'Tickets',
         items: [
-            {
-                label: 'License',
-                icon: 'pi pi-fw pi-database',
-                to: '/pages/license'
-            }
-        ]
-    },
-    {
-        items: [
-            {
-                label: 'Profile',
-                icon: 'pi pi-fw pi-database',
-                to: '/pages/profile'
-            }
-        ]
-    },
-    {
-        items: [
-            {
-                label: 'Admin License',
-                icon: 'pi pi-fw pi-discord',
-                to: '/pages/admin/license'
-            }
+            { label: 'Ticket Panel', icon: 'pi pi-fw pi-ticket', to: '/tickets/panels' },
+            { label: 'Ticket Logs', icon: 'pi pi-fw pi-file', to: '/tickets/logs' }
         ]
     }
 ];
 
-const model = ref([]);
-
-const initializeMenuItems = () => {
-    const userData = localStorage.getItem('userData');
-    const user = userData === 'true';
-    model.value = allMenuItems.filter((menuItem) => {
-        if (menuItem.items[0].label === 'Admin License' && !user) {
-            return false;
-        }
-        return true;
-    });
-};
-
-onMounted(() => {
-    initializeMenuItems();
-});
+const model = ref(allMenuItems);
 </script>
 
 <template>
