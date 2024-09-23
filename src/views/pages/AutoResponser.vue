@@ -29,10 +29,10 @@
                     </template>
                 </Column>
                 <Column>
-                    <template #body>
+                    <template #body="slotProps">
                         <div class="flex items-center">
                             <Button icon="pi pi-trash" size="large" class="p-button-rounded p-button-danger p-button-text" />
-                            <Button icon="pi pi-file-edit" size="large" class="p-button-rounded p-button-text" />
+                            <Button icon="pi pi-file-edit" @click="() => handleEditPanel(slotProps.data.id)" size="large" class="p-button-rounded p-button-text" />
                         </div>
                     </template>
                 </Column>
@@ -53,10 +53,10 @@ import PageHeader from '../../components/PageHeader.vue';
 
 // Sample data for autoresponders
 const autoresponders = ref([
-    { trigger: 'Welcome Message', status: 'Active', match: 100 },
-    { trigger: 'Abandoned Cart', status: 'Active', match: 85 },
-    { trigger: 'Follow Up', status: 'Inactive', match: 70 },
-    { trigger: 'Thank You', status: 'Active', match: 95 }
+    { id: 1, trigger: 'Welcome Message', status: 'Active', match: 100 },
+    { id: 2, trigger: 'Abandoned Cart', status: 'Active', match: 85 },
+    { id: 3, trigger: 'Follow Up', status: 'Inactive', match: 70 },
+    { id: 4, trigger: 'Thank You', status: 'Active', match: 95 }
 ]);
 
 const textInput = ref('');
@@ -72,6 +72,10 @@ const filteredAutoresponders = computed(() => {
 
 function goToCreatePanel() {
     router.push('/autoresponders/create');
+}
+
+function handleEditPanel(id) {
+    router.push(`/autoresponders/edit/${id}`);
 }
 </script>
 

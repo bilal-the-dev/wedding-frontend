@@ -40,6 +40,11 @@ const router = createRouter({
                     component: () => import('@/views/pages/tickets/PanelsCreate.vue')
                 },
                 {
+                    path: '/tickets/panels/edit/:panelId',
+                    name: 'panelsEdit',
+                    component: () => import('@/views/pages/tickets/PanelsEdit.vue')
+                },
+                {
                     path: '/tickets/logs',
                     name: 'TicketLogs',
                     component: () => import('@/views/pages/tickets/TicketLogs.vue')
@@ -53,6 +58,11 @@ const router = createRouter({
                     path: '/autoresponders/create',
                     name: 'autoRespondersCreate',
                     component: () => import('@/views/pages/AutoResponserCreate.vue')
+                },
+                {
+                    path: '/autoresponders/edit/:responserId',
+                    name: 'autoRespondersEdit',
+                    component: () => import('@/views/pages/AutoResponserEdit.vue')
                 }
             ]
         }

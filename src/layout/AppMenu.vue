@@ -8,6 +8,7 @@ const allMenuItems = [
         label: 'Tickety',
         items: [
             { label: 'Overview', icon: 'pi pi-fw pi-eye', to: '/' },
+            { label: 'Server', icon: 'pi pi-fw pi-database', to: '/servers' },
             { label: 'Plans', icon: 'pi pi-fw pi-credit-card', to: '/plans' },
             { label: 'Settings', icon: 'pi pi-fw pi-spin pi-cog', to: '/settings' },
             { label: 'AutoResponder', icon: 'pi pi-fw pi-comment', to: '/autoresponders' }

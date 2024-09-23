@@ -6,7 +6,28 @@ import CustomTextField from '../../components/CustomTextField.vue';
 import PageHeader from '../../components/PageHeader.vue';
 import PanelNavigation from '../../components/sections/panels/PanelNavigation.vue';
 import ToggleBar from '../../components/ToggleBar.vue';
-
+const editPanelData = ref({
+    panelName: 'Nice',
+    supportRoles: ['Shard bot', 'CROWN: Trio'],
+    panelCategory: 'Role bot',
+    threadingMode: true,
+    saveTranscripts: false,
+    channelNameGeneration: 'Nice-benluka',
+    ticketCreationReply: 'Ticket Created Successfully',
+    rolesRequiredCreation: ['Shard bot'],
+    maxOpenTicketPerUser: 4,
+    userCanCloseTickets: true,
+    panelButton: {
+        emoji: { i: '😅' },
+        label: 'Open Ticket',
+        color: '#3366FF'
+    },
+    closeButton: {
+        emoji: { i: '🍍' },
+        label: 'Close Button',
+        color: '#3366FF'
+    }
+});
 const dropdownItems = ['Shard bot', 'admin', 'Role bot', 'Currencies', 'Liqta Ping', 'CROWN: Trio', 'Charlemagne', 'Commands Cooldown', 'admin', 'Role bot', 'Currencies', 'Liqta Ping', 'CROWN: Trio', 'Charlemagne'];
 const headerButtons = [
     {
@@ -28,7 +49,7 @@ const checked = ref(false);
             <CustomTextField placeholder="e.g How i can become a  moderator?" label="Trigger" />
             <div class="flex flex-col gap-2">
                 <label class="text-[#9090a3] font-bold flex gap-2">Ignored Channels <CustomExclaimTooltip tooltipText="ok" /></label>
-                <CustomDropDown :items="dropdownItems" :multiple="true" />
+                <CustomDropDown v-model="editPanelData.supportRoles" :items="dropdownItems" :multiple="true" />
                 <ToggleBar v-model="checked" label="Reply only in tickets" />
                 <ToggleBar v-model="checked" label="Delete trigger message" />
                 <ToggleBar v-model="checked" label="Admin Role Only" />

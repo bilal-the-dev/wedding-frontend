@@ -3,7 +3,8 @@
         <label class="text-[#9090a3] text-lg" v-if="label">{{ label }}</label>
         <input
             type="text"
-            v-model="inputValue"
+            :value="modelValue"
+            @input="updateValue"
             @focus="isFocused = true"
             @blur="handleBlur"
             :placeholder="placeholder"
@@ -17,6 +18,10 @@
 import { defineEmits, defineProps, ref, watch } from 'vue';
 
 const props = defineProps({
+    modelValue: {
+        type: String,
+        default: ''
+    },
     placeholder: {
         type: String,
         required: false,
@@ -44,17 +49,29 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const inputValue = ref('');
 const isFocused = ref(false);
+
+const updateValue = (event) => {
+    emit('update:modelValue', event.target.value);
+};
 
 const handleBlur = () => {
     isFocused.value = false;
-    emit('update:modelValue', inputValue.value);
 };
 
-watch(inputValue, (newValue) => {
-    emit('update:modelValue', newValue);
-});
+// Watch for changes in the modelValue prop
+watch(
+    () => props.modelValue,
+    (newValue) => {
+        if (newValue !== undefined) {
+            // Update the input value when the prop changes
+            const inputElement = document.querySelector('input');
+            if (inputElement) {
+                inputElement.value = newValue;
+            }
+        }
+    }
+);
 </script>
 
 <style scoped>

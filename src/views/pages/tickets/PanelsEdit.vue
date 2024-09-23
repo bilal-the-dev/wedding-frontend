@@ -1,4 +1,19 @@
-<script setup lang="ts">
+<template>
+    <div class="flex flex-col gap-4">
+        <PanelNavigation title="Edit a Panel" backLink="/tickets/panels" :buttons="headerButtons" :showDropdown="false" />
+        <PanelSettings v-model:settingsData="editPanelData" />
+        <TicketSettings v-model:settingsData="editPanelData" />
+        <PanelMessage />
+        <div class="card flex flex-col gap-4">
+            <PageHeader title="Ticket Components" />
+            <TicketComponent :label="'Panel Button'" :labelText="'Label'" :buttonConfig="editPanelData.panelButton" />
+            <CustomSeprator />
+            <TicketComponent :label="'Close Button'" :labelText="'Label'" :buttonConfig="editPanelData.closeButton" />
+        </div>
+    </div>
+</template>
+
+<script setup>
 import { ref } from 'vue';
 import CustomSeprator from '../../../components/CustomSeprator.vue';
 import PageHeader from '../../../components/PageHeader.vue';
@@ -7,6 +22,7 @@ import PanelNavigation from '../../../components/sections/panels/PanelNavigation
 import PanelSettings from '../../../components/sections/panels/PanelSettings.vue';
 import TicketComponent from '../../../components/sections/panels/TicketComponent.vue';
 import TicketSettings from '../../../components/sections/panels/TicketSettings.vue';
+
 const editPanelData = ref({
     panelName: 'Nice',
     supportRoles: ['Shard bot', 'CROWN: Trio'],
@@ -29,6 +45,17 @@ const editPanelData = ref({
         color: '#3366FF'
     }
 });
+
+const headerButtons = [
+    {
+        label: 'Save',
+        onClick: () => {
+            // Your save logic here
+            console.log('Saving:', editPanelData.value);
+        }
+    }
+];
+
 const buttonConfig = ref({
     emoji: { i: '😊' }, // Adjust your emoji structure as needed
     label: 'Open Ticket',
@@ -39,35 +66,4 @@ const closeButtonConfig = ref({
     label: 'Close',
     color: '#3366FF'
 });
-
-const dropdownItems = ['Shard bot', 'Admin', 'Role bot', 'Currencies', 'Liqta Ping', 'CROWN: Trio', 'Charlemagne', 'Commands Cooldown'];
-const headerButtons = [
-    {
-        label: 'Publish',
-        onClick: () => {
-            // Your publish logic here
-        }
-    },
-    {
-        label: 'Create',
-        onClick: () => {
-            // Your create logic here
-        }
-    }
-];
 </script>
-
-<template>
-    <div class="flex flex-col gap-4">
-        <PanelNavigation title="Create a Panel" backLink="/tickets/panels" :buttons="headerButtons" :showDropdown="false" />
-        <PanelSettings v-model:settingsData="editPanelData" />
-        <TicketSettings v-model:settingsData="editPanelData" />
-        <PanelMessage />
-        <div class="card flex flex-col gap-4">
-            <PageHeader title="Ticket Components" />
-            <TicketComponent :label="'Panel Button'" :labelText="'Label'" :buttonConfig="editPanelData.panelButton" />
-            <CustomSeprator />
-            <TicketComponent :label="'Close Button'" :labelText="'Label'" :buttonConfig="editPanelData.closeButton" />
-        </div>
-    </div>
-</template>

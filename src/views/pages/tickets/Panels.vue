@@ -36,16 +36,18 @@
                     </template>
                 </Column>
                 <Column>
-                    <template #body>
+                    <template #body="slotProps">
                         <div class="flex items-center">
-                            <Button icon="pi pi-trash" size="large" class="p-button-rounded p-button-danger p-button-text" />
-                            <Button icon="pi pi-file-edit" size="large" class="p-button-rounded p-button-text" />
+                            <Button icon="pi pi-trash" size="large" @click="openDeleteModal" class="p-button-rounded p-button-danger p-button-text" />
+                            <Button icon="pi pi-file-edit" size="large" @click="() => handleEditPanel(slotProps.data.id)" class="p-button-rounded p-button-text" />
                         </div>
                     </template>
                 </Column>
             </DataTable>
         </div>
     </div>
+
+    <CustomDeleteAlertModel ref="deleteModal" :onConfirm="handleDelete" confirmText="Delete Panel" />
 </template>
 
 <script setup lang="ts">
@@ -54,13 +56,23 @@ import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import CustomDeleteAlertModel from '../../../components/CustomDeleteAlertModel.vue';
 import CustomTextField from '../../../components/CustomTextField.vue';
 import NavCreate from '../../../components/NavCreate.vue';
 import PageHeader from '../../../components/PageHeader.vue';
 
 const router = useRouter();
 const textInput = ref('');
+const deleteModal = ref(null);
 
+const openDeleteModal = () => {
+    deleteModal.value.openModal();
+};
+
+const handleDelete = () => {
+    // Perform delete operation
+    console.log('Panel deleted');
+};
 // Dummy data for the DataTable
 const tickets = ref([
     { id: 1, panelName: 'SSS', category: 'Voice Channels', status: 'Active', openTickets: 0 },
@@ -79,6 +91,9 @@ const filteredTickets = computed(() => {
 
 function goToCreatePanel() {
     router.push('/tickets/panels/create');
+}
+function handleEditPanel(id) {
+    router.push(`/tickets/panels/edit/${id}`);
 }
 </script>
 

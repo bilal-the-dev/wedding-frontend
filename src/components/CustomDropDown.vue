@@ -3,7 +3,7 @@
         <div class="relative">
             <div class="w-full px-4 py-2 min-h-[56px] text-white bg-[#172135] rounded focus-within:ring-2 focus-within:ring-blue-500 flex flex-wrap items-center gap-2" @click="openDropdown">
                 <template v-if="multiple">
-                    <span v-for="(item, index) in selectedItems" :key="index" class="bg-[#1f2c47] px-2 py-1 rounded flex items-center gap-1">
+                    <span v-for="(item, index) in modelValue" :key="index" class="bg-[#1f2c47] px-2 py-1 rounded flex items-center gap-1">
                         {{ item }}
                         <button @click.stop="removeItem(item)" class="text-gray-400 hover:text-white">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -12,7 +12,7 @@
                         </button>
                     </span>
                 </template>
-                <input type="text" v-model="inputValue" @input="filterItems" :placeholder="multiple && selectedItems.length ? '' : 'Select an option'" class="bg-transparent focus:outline-none flex-grow" />
+                <input type="text" v-model="inputValue" @input="filterItems" :placeholder="multiple && modelValue.length ? '' : 'Select an option'" class="bg-transparent focus:outline-none flex-grow" />
             </div>
             <span class="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <svg class="w-4 h-4 transition-transform duration-300" :class="{ 'transform rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -49,6 +49,10 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
+    modelValue: {
+        type: [Array, String, Number],
+        required: true
+    },
     items: {
         type: Array,
         required: true
@@ -62,7 +66,6 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const isOpen = ref(false);
-const selectedItems = ref([]);
 const inputValue = ref('');
 const filteredItems = ref([...props.items]);
 
@@ -78,35 +81,30 @@ const filterItems = () => {
 
 const selectItem = (item) => {
     if (props.multiple) {
-        const index = selectedItems.value.indexOf(item);
+        const newValue = Array.isArray(props.modelValue) ? [...props.modelValue] : [];
+        const index = newValue.indexOf(item);
         if (index === -1) {
-            selectedItems.value.push(item);
+            newValue.push(item);
         } else {
-            selectedItems.value.splice(index, 1);
+            newValue.splice(index, 1);
         }
-        inputValue.value = '';
+        emit('update:modelValue', newValue);
     } else {
-        selectedItems.value = [item];
+        emit('update:modelValue', item);
         inputValue.value = item;
         isOpen.value = false;
     }
-    emitValue();
 };
 
 const removeItem = (item) => {
-    const index = selectedItems.value.indexOf(item);
-    if (index !== -1) {
-        selectedItems.value.splice(index, 1);
-        emitValue();
+    if (props.multiple && Array.isArray(props.modelValue)) {
+        const newValue = props.modelValue.filter((i) => i !== item);
+        emit('update:modelValue', newValue);
     }
 };
 
 const isItemSelected = (item) => {
-    return selectedItems.value.includes(item);
-};
-
-const emitValue = () => {
-    emit('update:modelValue', props.multiple ? selectedItems.value : selectedItems.value[0] || null);
+    return Array.isArray(props.modelValue) ? props.modelValue.includes(item) : props.modelValue === item;
 };
 
 const handleClickOutside = (event) => {
@@ -121,6 +119,16 @@ watch(
         filteredItems.value = [...props.items];
     },
     { deep: true }
+);
+
+watch(
+    () => props.modelValue,
+    () => {
+        if (!props.multiple) {
+            inputValue.value = props.modelValue;
+        }
+    },
+    { immediate: true }
 );
 
 onMounted(() => {
