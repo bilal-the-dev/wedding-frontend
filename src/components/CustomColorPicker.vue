@@ -49,7 +49,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const localColor = ref(props.modelValue);
 const showPalette = ref(false);
-const selectiveColors = ['#3366FF', '#808080', '#4CAF50', '#FF0000'];
+const selectiveColors = ['#5865F2', '#4F545C', '#57F287', '#ED4245'];
 
 watch(
     () => props.modelValue,

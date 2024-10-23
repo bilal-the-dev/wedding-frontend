@@ -1,15 +1,29 @@
 <template>
+    <CustomDeleteAlertModel
+        ref="deleteModal"
+        title="Delete Autoresponder"
+        message="Are you sure you want to delete this autoresponder? This action cannot be undone."
+        cancelText="Cancel"
+        confirmText="Yes, Delete"
+        :onConfirm="confirmDeleteAutoresponder"
+    />
     <NavCreate title="Create New Autoresponder" icon="/images/svg/plus_sign.svg" :onClick="goToCreatePanel" />
 
     <div class="card flex flex-col gap-4 mt-4">
         <PageHeader title="Your Autoresponders" />
-        <div class="flex flex-col gap-4 mb-4">
-            <label class="text-[#9090a3] font-bold">Search Autoresponders</label>
-            <CustomTextField customWidth="max-w-[120rem]" :isIcon="true" iconSrc="/images/svg/textField_icon.svg" v-model="textInput" placeholder="Enter a keyword (e.g., trigger, status)" />
+        <div v-if="isLoading" class="flex justify-center items-center h-64">
+            <CustomProgressSpinner />
         </div>
 
-        <!-- Custom DataTable -->
-        <div class="card rounded-lg overflow-hidden">
+        <div v-else class="flex flex-col gap-4 mb-4">
+            <label class="text-[#9090a3] font-bold">Search Autoresponders</label>
+            <IconField>
+                <InputIcon class="pi pi-search" />
+                <InputText v-model="textInput" placeholder="Enter a keyword (e.g., trigger, status)" />
+            </IconField>
+        </div>
+
+        <div v-else class="card rounded-lg overflow-hidden">
             <DataTable :value="filteredAutoresponders" tableStyle="min-width: 70rem; width: 100%;" class="custom-datatable">
                 <Column field="trigger" header="Trigger" style="width: 40%">
                     <template #body="slotProps">
@@ -23,15 +37,15 @@
                         </span>
                     </template>
                 </Column>
-                <Column field="match" header="Match" style="width: 20%">
+                <Column field="reply" header="Reply" style="width: 20%">
                     <template #body="slotProps">
-                        <p class="text-large data-cell">{{ slotProps.data.match }}%</p>
+                        <p class="text-large data-cell">{{ slotProps.data.reply }}</p>
                     </template>
                 </Column>
                 <Column>
                     <template #body="slotProps">
                         <div class="flex items-center">
-                            <Button icon="pi pi-trash" size="large" class="p-button-rounded p-button-danger p-button-text" />
+                            <Button icon="pi pi-trash" @click="showDeleteModal(slotProps.data.id)" size="large" class="p-button-rounded p-button-danger p-button-text" />
                             <Button icon="pi pi-file-edit" @click="() => handleEditPanel(slotProps.data.id)" size="large" class="p-button-rounded p-button-text" />
                         </div>
                     </template>
@@ -45,38 +59,84 @@
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import CustomTextField from '../../components/CustomTextField.vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import NavCreate from '../../components/NavCreate.vue';
 import PageHeader from '../../components/PageHeader.vue';
+import { deleteAutoResponser, getAutoResponser } from '../../service/settings.services';
+import CustomProgressSpinner from '../../components/CustomProgressSpinner.vue';
+import CustomDeleteAlertModel from '../../components/CustomDeleteAlertModel.vue';
 
-// Sample data for autoresponders
-const autoresponders = ref([
-    { id: 1, trigger: 'Welcome Message', status: 'Active', match: 100 },
-    { id: 2, trigger: 'Abandoned Cart', status: 'Active', match: 85 },
-    { id: 3, trigger: 'Follow Up', status: 'Inactive', match: 70 },
-    { id: 4, trigger: 'Thank You', status: 'Active', match: 95 }
-]);
+const isLoading = ref(true);
 
+const autorespondersData = ref([]);
 const textInput = ref('');
 const router = useRouter();
+const route = useRoute();
+const id = route.params.id;
 
-// Computed property for filtering autoresponders
+function summarizeText(text) {
+    const trimmedText = text.trim();
+    if (trimmedText.length > 25) {
+        return trimmedText.slice(0, 25) + '...';
+    }
+    return trimmedText;
+}
+
 const filteredAutoresponders = computed(() => {
     const query = textInput.value.toLowerCase();
-    if (!query) return autoresponders.value;
+    if (!query) return autorespondersData.value;
 
-    return autoresponders.value.filter((autoresponder) => autoresponder.trigger.toLowerCase().includes(query) || autoresponder.status.toLowerCase().includes(query));
+    return autorespondersData.value.filter((autoresponder) => autoresponder.trigger.toLowerCase().includes(query) || autoresponder.status.toLowerCase().includes(query));
 });
 
-function goToCreatePanel() {
-    router.push('/autoresponders/create');
+async function deleteAutoresponder(responseId) {
+    await deleteAutoResponser(id, responseId);
+    autorespondersData.value = autorespondersData.value.filter((autoresponder) => autoresponder.id !== responseId);
 }
 
-function handleEditPanel(id) {
-    router.push(`/autoresponders/edit/${id}`);
+const deleteModal = ref(null);
+let selectedResponseId = null;
+
+function showDeleteModal(responseId) {
+    selectedResponseId = responseId;
+    deleteModal.value.openModal();
 }
+
+async function confirmDeleteAutoresponder() {
+    if (selectedResponseId) {
+        await deleteAutoResponser(id, selectedResponseId);
+        autorespondersData.value = autorespondersData.value.filter((autoresponder) => autoresponder.id !== selectedResponseId);
+        selectedResponseId = null;
+    }
+}
+
+function goToCreatePanel() {
+    router.push(`/autoresponders/create/${id}`);
+}
+
+function handleEditPanel(responseId) {
+    router.push(`/autoresponders/edit/${responseId}/${id}`);
+}
+
+onMounted(async () => {
+    try {
+        const { settings } = await getAutoResponser(id);
+        const autoResponders = settings.autoResponders;
+        autorespondersData.value = autoResponders.map((response) => {
+            return {
+                id: response._id,
+                status: 'Active',
+                trigger: response.trigger,
+                reply: summarizeText(response.reply)
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching autoresponders:', error);
+    } finally {
+        isLoading.value = false;
+    }
+});
 </script>
 
 <style scoped>
@@ -94,11 +154,17 @@ function handleEditPanel(id) {
 }
 
 .text-large {
-    font-size: 1.25rem; /* Adjust this size as needed */
+    font-size: 1.25rem;
 }
 
-/* Added padding to table cells */
 .data-cell {
-    padding: 10px 0px; /* Adjust top/bottom and left/right padding as needed */
+    padding: 10px 0px;
+}
+
+:deep(.p-inputtext) {
+    width: 100%;
+    max-width: 120rem;
+    height: 3.3rem;
+    background-color: #172135;
 }
 </style>

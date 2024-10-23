@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { watchEffect } from 'vue';
 import BarCounter from '../../BarCounter.vue';
 import CustomExclaimTooltip from '../../CustomExclaimTooltip.vue';
-import CustomTextField from '../../CustomTextField.vue';
 
 const props = defineProps({
     settingsData: {
@@ -13,8 +13,13 @@ const props = defineProps({
 const emit = defineEmits(['update:settingsData']);
 
 const updateSetting = (key, value) => {
-    emit('update:settingsData', { ...props.settingsData, [key]: value });
+    const updatedSettings = { ...props.settingsData, [key]: value };
+    emit('update:settingsData', updatedSettings);
 };
+
+watchEffect(() => {
+    emit('update:settingsData', props.settingsData);
+});
 </script>
 
 <template>
@@ -31,6 +36,28 @@ const updateSetting = (key, value) => {
             <p class="text-md">Autoresponder Reply</p>
             <p class="text-sm font-normal text-gray-300">Customize the reply to your needs</p>
         </div>
-        <CustomTextField :modelValue="settingsData.autoResponseReply" @update:modelValue="updateSetting('autoResponseReply', $event)" placeholder="e.g we are not looking for moderators" />
+        <InputText v-model="settingsData.autoResponseReply" placeholder="e.g we are not looking for moderators" />
     </div>
 </template>
+
+<style scoped>
+:deep(.p-inputtext) {
+    width: 100%;
+    max-width: 32rem;
+    height: 3.6rem;
+    background-color: #172135;
+}
+:deep(.p-multiselect) {
+    width: 100%;
+    max-width: 32rem;
+    height: 3.6rem;
+    background-color: #172135;
+}
+:deep(.p-multiselect-label) {
+    padding-top: 1rem;
+}
+:deep(.p-multiselect-label:has(.p-chip)) {
+    padding-top: 0.8rem;
+    padding-left: 0.5rem;
+}
+</style>

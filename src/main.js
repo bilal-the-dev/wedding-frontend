@@ -12,6 +12,8 @@ import '@/assets/tailwind.css';
 
 const app = createApp(App);
 
+import Tooltip from 'primevue/tooltip';
+
 app.use(router);
 app.use(PrimeVue, {
     theme: {
@@ -24,4 +26,5 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 
+app.directive('tooltip', Tooltip);
 app.mount('#app');

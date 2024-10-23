@@ -1,45 +1,64 @@
-<script setup lang="ts">
-import ServerCard from '../../components/ServerCard.vue';
-
-// Array of server objects
-const servers = [
-    {
-        imageUrl: 'https://th.bing.com/th/id/R.11991d9b6e676d00ecfcf8c537c8667b?rik=CIiipjJChLiomw&pid=ImgRaw&r=0',
-        title: 'Bid2Bill',
-        secondaryButtonText: 'View Details'
-    },
-    {
-        imageUrl: 'https://th.bing.com/th/id/OIP.mXRwK1TJiCxObn4Us6dtOwHaHa?rs=1&pid=ImgDetMain',
-        title: 'TaskFlow',
-        secondaryButtonText: 'View Details'
-    },
-    {
-        imageUrl: 'https://th.bing.com/th/id/R.11991d9b6e676d00ecfcf8c537c8667b?rik=CIiipjJChLiomw&pid=ImgRaw&r=0',
-        title: 'DevXHub',
-        secondaryButtonText: 'View Details'
-    },
-    {
-        imageUrl: 'https://th.bing.com/th/id/R.11991d9b6e676d00ecfcf8c537c8667b?rik=CIiipjJChLiomw&pid=ImgRaw&r=0',
-        title: 'NextGen',
-        secondaryButtonText: 'View Details'
-    }
-];
-</script>
-
 <template>
-    <div class="flex flex-col items-center gap-5 text-center">
+    <div class="flex flex-col mt-28 items-center gap-5 text-center">
         <h2 class="text-4xl sm:text-5xl font-bold">Select a Server</h2>
         <p class="text-lg sm:text-xl mb-8">Please select a server to manage or add Tickety to it</p>
     </div>
     <div class="container mx-auto mt-8 p-4 sm:p-6">
+        <!-- Loading spinner -->
+        <div v-if="isLoading" class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
         <!-- Responsive grid layout -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Render ServerCard components dynamically -->
-            <ServerCard v-for="(server, index) in servers" :key="index" :imageUrl="server.imageUrl" :title="server.title" :secondaryButtonText="server.secondaryButtonText" />
+            <ServerCard v-for="(server, index) in servers" :key="index" :id="server.id" :imageUrl="server.imageUrl" :title="server.title" :secondaryButtonText="server.secondaryButtonText" :inviteUrl="inviteUrl" />
         </div>
     </div>
 </template>
 
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import ServerCard from '../../components/ServerCard.vue';
+import { getGuilds } from '../../service/auth.services';
+
+const servers = ref([]);
+const isLoading = ref(true);
+const inviteUrl = ref('');
+function getFirst20Chars(str: string): string {
+    const first15 = str.slice(0, 15);
+    return str.length > 20 ? first15 + '...' : str;
+}
+
+onMounted(async () => {
+    try {
+        const data = await getGuilds();
+        servers.value = data.guilds
+            .map((guild) => ({
+                id: guild.id,
+                imageUrl: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : '/images/png/default.png',
+                title: getFirst20Chars(guild.name),
+                secondaryButtonText: guild.isBotPresent && guild.isBotPresent === true ? 'Manage' : 'Invite'
+            }))
+            .sort((a, b) => {
+                // Sort to have "Manage" come before "Invite"
+                if (a.secondaryButtonText === 'Manage' && b.secondaryButtonText === 'Invite') {
+                    return -1;
+                }
+                if (a.secondaryButtonText === 'Invite' && b.secondaryButtonText === 'Manage') {
+                    return 1;
+                }
+                return 0;
+            });
+        inviteUrl.value = data.inviteURL;
+    } catch (error) {
+        console.error('Error fetching guilds:', error);
+        // Handle error (e.g., show error message to user)
+    } finally {
+        isLoading.value = false;
+    }
+});
+</script>
+
 <style scoped>
-/* Optionally, you can add some custom styling here */
+/* Custom styles can be added here if needed */
 </style>

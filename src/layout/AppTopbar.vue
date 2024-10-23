@@ -1,12 +1,13 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import { useRouter } from 'vue-router';
-import axiosInstance from '../service/api';
+import { useRoute, useRouter } from 'vue-router';
 const router = useRouter();
+const route = useRoute();
+const guildId = route.params.id;
 async function logout() {
-    await axiosInstance.post('/auth/discord/logout');
-    localStorage.removeItem('userData');
-    router.push('/login');
+    // await axiosInstance.post('/auth/discord/logout');
+    // localStorage.removeItem('userData');
+    router.push(`/profile/${guildId}`);
 }
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
 </script>
@@ -33,8 +34,8 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
                     <button type="button" @click="logout" class="layout-topbar-action">
-                        <i class="pi pi-sign-out"></i>
-                        <span>Logout</span>
+                        <i class="pi pi-user"></i>
+                        <span>Profile</span>
                     </button>
                 </div>
             </div>

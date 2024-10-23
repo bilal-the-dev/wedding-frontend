@@ -1,5 +1,14 @@
 <template>
-    <div class="text-white p-8">
+    <div class="relative text-white p-8">
+        <!-- Overlay -->
+        <div v-if="showOverlay" class="absolute inset-0 bg-black bg-opacity-80 flex justify-center items-center z-10">
+            <div class="bg-[#172135] text-black rounded-lg p-12 shadow-lg flex flex-col items-center justify-center text-center space-y-6">
+                <i class="pi pi-exclamation-triangle text-[140px] text-red-500" style="font-size: 8rem"></i>
+                <h2 class="text-4xl font-bold text-gray-200">Under Construction</h2>
+                <p class="text-2xl font-semibold text-gray-200">We're working hard to bring this feature to you soon!</p>
+            </div>
+        </div>
+        <!-- Page content -->
         <div class="flex flex-col items-center text-center gap-4">
             <h1 class="font-bold tracking-[1px] text-[33px]">Up your Game with Tickety Premium</h1>
             <h2 class="text-[#cfd0d7] font-[450] max-w-[37rem] mb-[29px] text-[18px] mx-auto">Unlock all of Tickety's premium features to stand out from the competition and enhance your server experience.</h2>
@@ -98,3 +107,22 @@
         </div>
     </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const showOverlay = ref(true); // Set this to `false` to hide the overlay
+</script>
+
+<style scoped>
+/* Overlay Styles */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+</style>

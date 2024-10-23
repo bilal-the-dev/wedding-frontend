@@ -1,7 +1,12 @@
 <template>
     <PageHeader title="Ticket Panels" description="Tickets panels allow your users to interact with the ticket system." />
     <NavCreate title="Create New Panel" icon="/images/svg/plus_sign.svg" :onClick="goToCreatePanel" />
-    <div class="card">
+
+    <div v-if="isLoading" class="flex justify-center items-center h-64">
+        <CustomProgressSpinner />
+    </div>
+
+    <div v-else class="card">
         <PageHeader title="Your Ticket Panels" stats="1/25" />
 
         <div class="flex flex-col gap-4 mb-4">
@@ -38,7 +43,7 @@
                 <Column>
                     <template #body="slotProps">
                         <div class="flex items-center">
-                            <Button icon="pi pi-trash" size="large" @click="openDeleteModal" class="p-button-rounded p-button-danger p-button-text" />
+                            <Button icon="pi pi-trash" size="large" @click="() => openDeleteModal(slotProps.data.id)" class="p-button-rounded p-button-danger p-button-text" />
                             <Button icon="pi pi-file-edit" size="large" @click="() => handleEditPanel(slotProps.data.id)" class="p-button-rounded p-button-text" />
                         </div>
                     </template>
@@ -48,39 +53,52 @@
     </div>
 
     <CustomDeleteAlertModel ref="deleteModal" :onConfirm="handleDelete" confirmText="Delete Panel" />
+    <Toast />
 </template>
 
 <script setup lang="ts">
 import Button from 'primevue/button';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import CustomDeleteAlertModel from '../../../components/CustomDeleteAlertModel.vue';
+import CustomProgressSpinner from '../../../components/CustomProgressSpinner.vue';
 import CustomTextField from '../../../components/CustomTextField.vue';
 import NavCreate from '../../../components/NavCreate.vue';
 import PageHeader from '../../../components/PageHeader.vue';
+import { deletePanel, getPanelForGuilds } from '../../../service/panels.services';
 
 const router = useRouter();
+const toast = useToast();
 const textInput = ref('');
 const deleteModal = ref(null);
-
-const openDeleteModal = () => {
+const isLoading = ref(true); // Loading state
+const route = useRoute();
+const id = route.params.id;
+const selectedId = ref();
+const openDeleteModal = (id) => {
     deleteModal.value.openModal();
+    selectedId.value = id;
 };
 
-const handleDelete = () => {
-    // Perform delete operation
-    console.log('Panel deleted');
+const tickets = ref([]);
+
+const handleDelete = async () => {
+    console.log(selectedId.value);
+    if (selectedId.value) {
+        try {
+            tickets.value = tickets.value.filter((ticket) => ticket.id !== selectedId.value);
+            await deletePanel(selectedId.value);
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Panel deleted successfully', life: 3000 });
+            selectedId.value = null;
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete panel', life: 3000 });
+            console.error('Error deleting panel:', error);
+        }
+    }
 };
-// Dummy data for the DataTable
-const tickets = ref([
-    { id: 1, panelName: 'SSS', category: 'Voice Channels', status: 'Active', openTickets: 0 },
-    { id: 2, panelName: 'Billing Issues', category: 'Billing', status: 'Active', openTickets: 2 },
-    { id: 3, panelName: 'Technical Help', category: 'Technical', status: 'Inactive', openTickets: 5 },
-    { id: 4, panelName: 'Feature Requests', category: 'Feedback', status: 'Active', openTickets: 1 },
-    { id: 5, panelName: 'Bug Reports', category: 'Technical', status: 'Active', openTickets: 3 }
-]);
 
 const filteredTickets = computed(() => {
     const query = textInput.value.toLowerCase();
@@ -90,11 +108,31 @@ const filteredTickets = computed(() => {
 });
 
 function goToCreatePanel() {
-    router.push('/tickets/panels/create');
+    router.push(`/tickets/panels/create/${id}`);
 }
-function handleEditPanel(id) {
-    router.push(`/tickets/panels/edit/${id}`);
+
+function handleEditPanel(panelId) {
+    router.push(`/tickets/panels/edit/${panelId}/${id}`);
 }
+
+onMounted(async () => {
+    try {
+        const data = await getPanelForGuilds(id);
+        tickets.value = data.panels.map((panel) => {
+            return {
+                id: panel._id,
+                panelName: panel.panelName,
+                openTickets: 2,
+                status: 'Active',
+                category: data.cache.categories.find((category) => category.id == panel.ticketOpenCategoryId).name
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching panels:', error);
+    } finally {
+        isLoading.value = false;
+    }
+});
 </script>
 
 <style scoped>
