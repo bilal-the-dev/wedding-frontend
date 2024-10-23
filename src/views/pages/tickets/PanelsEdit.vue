@@ -3,7 +3,7 @@
         <CustomProgressSpinner />
     </div>
     <div v-else class="flex flex-col gap-4">
-        <PanelNavigation title="Edit a Panel" :backLink="`/tickets/panels/${id}`" :buttons="headerButtons" :showDropdown="false" />
+        <PanelNavigation title="Edit a Panel" :backLink="`/tickets/panels/${guildId}`" :buttons="headerButtons" :showDropdown="false" />
         <PanelSettings v-model:settingsData="editPanelData" />
         <TicketSettings v-model:settingsData="editPanelData" />
         <PanelMessage v-model="editPanelData.panelEmbed" :headerTitle="'Custom Panel Message'" :subTitle="'Custom Panel Embed'" :description="'Customize your panel embed here'" />
