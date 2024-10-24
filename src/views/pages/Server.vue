@@ -1,4 +1,10 @@
 <template>
+    <div class="mt-8 flex justify-end">
+        <button class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 flex items-center space-x-2" @click="logout">
+            <i class="pi pi-sign-out"></i>
+            <span>Logout</span>
+        </button>
+    </div>
     <div class="flex flex-col mt-28 items-center gap-5 text-center">
         <h2 class="text-4xl sm:text-5xl font-bold">Select a Server</h2>
         <p class="text-lg sm:text-xl mb-8">Please select a server to manage or add Tickety to it</p>
@@ -18,8 +24,10 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+
+import { useRouter } from 'vue-router';
 import ServerCard from '../../components/ServerCard.vue';
-import { getGuilds } from '../../service/auth.services';
+import { getGuilds, logoutFromApp } from '../../service/auth.services';
 
 const servers = ref([]);
 const isLoading = ref(true);
@@ -57,6 +65,12 @@ onMounted(async () => {
         isLoading.value = false;
     }
 });
+const router = useRouter();
+async function logout() {
+    await logoutFromApp();
+    localStorage.removeItem('userId');
+    router.push('/login');
+}
 </script>
 
 <style scoped>
