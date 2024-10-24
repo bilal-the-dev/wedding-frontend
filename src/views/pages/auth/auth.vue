@@ -37,7 +37,7 @@ onMounted(async () => {
     } catch (error) {
         console.log(error);
         localStorage.removeItem('userId');
-        return (window.location.href = AUTHURL);
+       // return (window.location.href = AUTHURL);
     }
 });
 </script>
