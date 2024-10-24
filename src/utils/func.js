@@ -124,7 +124,7 @@ export const formatPanelData = (editPanelData) => {
                 name: editPanelData.panelEmbed?.embedHeader || '',
                 url: editPanelData.panelEmbed?.headerURL || ''
             },
-            title: editPanelData.panelEmbed.title,
+            title: editPanelData.panelEmbed.embedTitle,
             description: editPanelData.panelEmbed?.embedDescription || '',
             footer: {
                 text: editPanelData.panelEmbed?.embedFooter || ''
@@ -135,7 +135,7 @@ export const formatPanelData = (editPanelData) => {
                 name: editPanelData.ticketEmbed?.embedHeader || '',
                 url: editPanelData.ticketEmbed?.headerURL || ''
             },
-            title: editPanelData.ticketEmbed.title,
+            title: editPanelData.ticketEmbed.embedTitle,
             description: editPanelData.ticketEmbed?.embedDescription || '',
             footer: {
                 text: editPanelData.ticketEmbed?.embedFooter || ''
