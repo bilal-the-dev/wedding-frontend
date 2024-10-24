@@ -6,7 +6,8 @@ const axiosInstance = axios.create({
     baseURL: AUTH_URL,
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: true
 });
 
 export default axiosInstance;
