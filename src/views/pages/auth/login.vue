@@ -64,7 +64,7 @@
         <!-- Sloped background -->
         <div class="absolute inset-0 bg-gray-900 transform -skew-y-3 origin-top-right scale-110"></div>
 
-        <div class="relative z-10 container mx-auto px-4">
+        <div class="relative z-10 container mx-auto px-4 bg-gray-900">
             <!-- Header Text -->
             <div class="text-center mb-16">
                 <p class="text-gray-400 uppercase tracking-wider mb-3">STATISTICS</p>
