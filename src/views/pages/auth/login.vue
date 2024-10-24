@@ -1,9 +1,9 @@
 <template>
-    <div class="min-h-screen bg-gray-900">
+    <div class="min-h-screen">
         <!-- Navbar -->
         <nav class="px-6 py-4 flex items-center justify-between">
             <div class="flex items-center">
-                <span class="text-2xl font-bold text-white">TaskFlow</span>
+                <img src="https://tickety.top/_next/image?url=%2Flogo_text.webp&w=256&q=75" />
             </div>
 
             <div class="flex items-center gap-6">
@@ -18,9 +18,9 @@
         </nav>
 
         <!-- Hero Section -->
-        <div class="flex flex-col items-center justify-center px-4 mt-32 text-center">
+        <div class="flex flex-col items-center justify-center px-4 mt-80 text-center">
             <h1 class="text-5xl font-bold text-white mb-4">
-                Task management
+                Ticket management
                 <br />
                 like
                 <span class="relative inline-block">
@@ -55,7 +55,7 @@
                     <span class="mr-2">→</span>
                     Get Started
                 </button>
-                <button class="px-6 py-3 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition">Dashboard</button>
+                <button class="px-6 py-3 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition" @click="login">Dashboard</button>
             </div>
         </div>
     </div>
@@ -64,7 +64,7 @@
         <!-- Sloped background -->
         <div class="absolute inset-0 bg-gray-900 transform -skew-y-3 origin-top-right scale-110"></div>
 
-        <div class="relative z-10 container mx-auto px-4 bg-gray-900">
+        <div class="relative z-10 container mx-auto px-4">
             <!-- Header Text -->
             <div class="text-center mb-16">
                 <p class="text-gray-400 uppercase tracking-wider mb-3">STATISTICS</p>
