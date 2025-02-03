@@ -117,7 +117,8 @@ import { logoutFromApp, me } from '../../service/auth.services';
 
 const userData = ref({});
 onMounted(async () => {
-    userData.value = await me();
+ const {data} = await me();
+userData.value = data;
 });
 
 const showProfileModal = ref(false);

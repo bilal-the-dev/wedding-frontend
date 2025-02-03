@@ -1,37 +1,107 @@
 <template>
-    <div class="mt-8 flex justify-end">
-        <button class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300 flex items-center space-x-2" @click="logout">
-            <i class="pi pi-sign-out"></i>
-            <span>Logout</span>
-        </button>
+    <nav class="bg-gray-900 text-white py-6">
+    <div class="container mx-auto flex justify-between items-center">
+      <!-- Left Side: Logo -->
+      <div class="flex items-center space-x-3 ml-4">
+        <img src="/images/png/logo.png" alt="Logo" class="h-16 w-16" />
+        <h1 class="text-[28px] font-semibold text-gray-200">KillField</h1>
+      </div>
+
+      <!-- Right Side: Avatar, Name, and Popover -->
+      <div class="relative flex items-center space-x-4 cursor-pointer mr-4" @click="toggle">
+        <!-- Avatar Image -->
+        <img
+          :src="user.avatar || '/demo/images/default-avatar.png'"
+          alt="User Avatar"
+          class="w-12 h-12 rounded-full border-2 border-gray-300"
+        />
+
+        <!-- User Name -->
+        <span class="text-[16px] text-gray-200 hidden sm:block">{{"Benluka.pp" }}</span>
+
+
+        <!-- Popover -->
+        <Popover ref="op">
+            <div class="flex flex-col gap-4 p-4 rounded-md shadow-lg ">
+            <!-- Avatar & Username -->
+            <div class="flex items-center gap-3">
+              <img
+                :src="user.avatar || '/demo/images/default-avatar.png'"
+                alt="User Avatar"
+                class="w-8 h-8 rounded-full border-2 border-gray-300"
+              />
+              <span class="font-medium text-gray-100">{{ "Benluka.pp"}}</span>
+            </div>
+
+            <!-- Separator Line -->
+            <hr class="border-gray-600" />
+
+            <!-- Logout Text -->
+            <span @click="logout" class="text-red-400 cursor-pointer hover:text-red-500 transition-colors duration-300">
+              Logout
+            </span>
+          </div>
+        </Popover>
+      </div>
     </div>
-    <div class="flex flex-col mt-28 items-center gap-5 text-center">
-        <h2 class="text-4xl sm:text-5xl font-bold">Select a Server</h2>
-        <p class="text-lg sm:text-xl mb-8">Please select a server to manage or add Tickety to it</p>
+  </nav>
+  <header class="relative w-full h-72 flex flex-col items-center justify-center text-center bg-cover bg-center">
+    <!-- Gradient Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+
+    <!-- Header Content -->
+    <div class="relative z-10 text-white px-4">
+      <h2 class="text-4xl sm:text-5xl font-extrabold drop-shadow-lg animate-fade-in">
+        Select a DayZ Service
+      </h2>
+      <p class="text-lg sm:text-xl mt-2 opacity-90">
+        Please select a service to manage
+      </p>
+
+     
     </div>
-    <div class="container mx-auto mt-8 p-4 sm:p-6">
-        <!-- Loading spinner -->
-        <div v-if="isLoading" class="flex justify-center items-center h-64">
-            <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-        <!-- Responsive grid layout -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Render ServerCard components dynamically -->
-            <ServerCard v-for="(server, index) in servers" :key="index" :id="server.id" :imageUrl="server.imageUrl" :title="server.title" :secondaryButtonText="server.secondaryButtonText" :inviteUrl="inviteUrl" />
-        </div>
+  </header>
+      
+  <div class="container mx-auto mt-8 p-4 sm:p-6">
+    <div v-if="isLoading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
     </div>
+    
+    <div v-else>
+      <!-- Check if services are empty -->
+      <div v-if="services.length === 0" class="text-center text-lg text-gray-500">
+        No Services to Display
+      </div>
+      
+      <!-- Show services cards if there are any services -->
+      <div v-else>
+        <ServicesCard :servers="services" />
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup lang="ts">
+import Popover from "primevue/popover";
 import { onMounted, ref } from 'vue';
-
 import { useRouter } from 'vue-router';
-import ServerCard from '../../components/ServerCard.vue';
 import { getGuilds, logoutFromApp } from '../../service/auth.services';
 
-const servers = ref([]);
+const op = ref();
+const user = ref({
+  name: "Username", // Replace with actual user data
+  avatar: "/demo/images/logo.svg", // Replace with actual avatar URL
+});
+// Toggle popover visibility
+const toggle = (event) => {
+  op.value.toggle(event);
+};
+
+const services = ref([]);
 const isLoading = ref(true);
-const inviteUrl = ref('');
+
+
 function getFirst20Chars(str: string): string {
     const first15 = str.slice(0, 15);
     return str.length > 20 ? first15 + '...' : str;
@@ -39,25 +109,12 @@ function getFirst20Chars(str: string): string {
 
 onMounted(async () => {
     try {
-        const data = await getGuilds();
-        servers.value = data.guilds
-            .map((guild) => ({
-                id: guild.id,
-                imageUrl: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : '/images/png/default.png',
-                title: getFirst20Chars(guild.name),
-                secondaryButtonText: guild.isBotPresent && guild.isBotPresent === true ? 'Manage' : 'Invite'
-            }))
-            .sort((a, b) => {
-                // Sort to have "Manage" come before "Invite"
-                if (a.secondaryButtonText === 'Manage' && b.secondaryButtonText === 'Invite') {
-                    return -1;
-                }
-                if (a.secondaryButtonText === 'Invite' && b.secondaryButtonText === 'Manage') {
-                    return 1;
-                }
-                return 0;
-            });
-        inviteUrl.value = data.inviteURL;
+        const {data, discordUser} = await getGuilds();
+        services.value = data;
+        user.value.name = discordUser.global_name;
+        user.value.avatar = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
+
+       
     } catch (error) {
         console.error('Error fetching guilds:', error);
         // Handle error (e.g., show error message to user)
@@ -73,6 +130,27 @@ async function logout() {
 }
 </script>
 
+
+
 <style scoped>
-/* Custom styles can be added here if needed */
+/* Background Image */
+header {
+  background-image: url('/images/png/cover.bg.png'); /* Replace with your image */
+}
+
+/* Smooth Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out;
+}
 </style>

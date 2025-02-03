@@ -6,7 +6,7 @@
                     <img :src="icon" />
                 </div>
                 <div>
-                    <p>{{ title }}</p>
+                    <p class="text-[18px]">{{ title }}</p>
                 </div>
             </div>
         </div>

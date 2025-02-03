@@ -30,6 +30,23 @@ const router = createRouter({
                     component: () => import('@/views/pages/Settings.vue')
                 },
                 {
+                    path: '/game/server/:id',
+                    name: 'gameserver',
+                    component: () => import('@/views/pages/GameServer.vue')
+                },
+                {
+                    path: '/economy/settings/:id',
+                    name: 'economySettings',
+                    component: () => import('@/views/pages/Economy.vue')
+                },
+                {
+                    path: '/leaderboard/:id',
+                    name: 'leaderboardSettings',
+                    component: () => import('@/views/pages/Leaderboard.vue')
+                },
+
+                
+                {
                     path: '/tickets/panels/:id',
                     name: 'panels',
                     component: () => import('@/views/pages/tickets/Panels.vue')
@@ -70,6 +87,11 @@ const router = createRouter({
             path: '/auth',
             meta: { guest: true },
             children: [
+                {
+                    path: '/global/leaderboard',
+                    name: 'globalLeaderboard',
+                    component: () => import('@/views/pages/auth/GlobalLeaderboard.vue')
+                },
                 {
                     path: '/auth',
                     name: 'auth',

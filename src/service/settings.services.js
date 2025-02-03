@@ -12,6 +12,58 @@ export async function getSettings(guildId) {
     }
 }
 
+
+export async function getNitradoSettings(serviceId) {
+    try {
+        const res = await axiosInstance.get(`/services/${serviceId}/realtime-info`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+
+export async function getDataBaseSettings(serviceId) {
+    try {
+        const res = await axiosInstance.get(`/services/${serviceId}/database-info`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+export async function getGlobalLeaderboard() {
+    try {
+        const res = await axiosInstance.get(`/services/leaderboards`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+export async function updateStatsSettings(serviceId, body) {
+    try {
+        const res = await axiosInstance.patch(`/services/${serviceId}/stats`,body);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
 export async function getAutoResponser(guildId) {
     try {
         const res = await axiosInstance.get(`/guilds/${guildId}/settings?withRoles=true&withChannels=true&withAutoResponders=true`);

@@ -1,9 +1,12 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import { onBeforeMount, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+
+const router = useRouter();
+
 
 const { layoutState, setActiveMenuItem, onMenuToggle } = useLayout();
 
@@ -45,6 +48,11 @@ watch(
 );
 
 function itemClick(event, item) {
+    const serviceId = route.params.id;
+    if(serviceId && item.params === true){
+    item.to = `${item.alone}/${serviceId}`;
+}
+    console.log(item.to)
     if (item.disabled) {
         event.preventDefault();
         return;
@@ -61,6 +69,8 @@ function itemClick(event, item) {
     const foundItemKey = item.items ? (isActiveMenu.value ? props.parentItemKey : itemKey) : itemKey.value;
 
     setActiveMenuItem(foundItemKey);
+
+    router.push(item.to)
 }
 
 function checkActiveRoute(item) {

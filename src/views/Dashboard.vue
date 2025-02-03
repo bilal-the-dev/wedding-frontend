@@ -12,7 +12,7 @@
             </div>
             <div class="grid grid-cols-12 gap-8 mt-8">
                 <div class="col-span-12 lg:col-span-12">
-                    <BarChart :colors="['#36A2EB', '#ffc800']" title="Opened & Closed Tickets" :datasets="chartDatasets1" :labels="chartLabels1" />
+                    <BarChart :colors="['#36A2EB', '#ffc800']" title="Total Kills and Deaths" :datasets="chartDatasets1" :labels="chartLabels1" />
                 </div>
             </div>
         </div>
@@ -26,19 +26,19 @@ import BarChart from '../components/BarChart.vue';
 import CustomProgressSpinner from '../components/CustomProgressSpinner.vue'; // Import the custom loader
 import PageHeader from '../components/PageHeader.vue';
 import StatCard from '../components/StatCard.vue';
-import { getAutoResponsersChannelsAndRoles } from '../service/settings.services';
+import { getGlobalLeaderboard } from '../service/settings.services';
 
 const route = useRoute();
-const guildId = route.params.id;
+const serviceId = route.params.id;
 const cards = ref([
     {
-        title: 'Opened Tickets',
+        title: 'Total Kills',
         count: 0,
         change: 0,
         icon: '/images/svg/ticket_create.svg'
     },
     {
-        title: 'Closed Tickets',
+        title: 'Total Deaths',
         count: 0,
         change: 0,
         icon: '/images/svg/ticket_create.svg'
@@ -49,79 +49,63 @@ const chartDatasets1 = ref([
     { label: 'Closed Tickets', data: [0, 0, 0, 0, 0, 0, 0] }
 ]);
 const chartLabels1 = ref(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-const isLoading = ref(true); // Loader state
+const isLoading = ref(true);
 
-function calculateTicketChange(timestamps) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
 
-    const todayTickets = timestamps.filter((timestamp) => new Date(timestamp) >= today).length;
-    const yesterdayTickets = timestamps.filter((timestamp) => {
-        const date = new Date(timestamp);
-        return date >= yesterday && date < today;
-    }).length;
+function getTopUsersByKillsAndDeaths(serviceId, data) {
+    // Filter the data for the given serviceId
+    const filteredData = data.filter(item => item.serviceId === serviceId);
 
-    const change = todayTickets - yesterdayTickets;
-    return change > 0 ? `+${change}` : change.toString();
-}
-
-function processWeeklyData(timestamps) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Set to Monday of current week
-
-    const weeklyData = [0, 0, 0, 0, 0, 0, 0];
-
-    timestamps.forEach((timestamp) => {
-        const date = new Date(timestamp);
-        if (date >= weekStart && date <= now) {
-            // Changed to include the current day
-            const dayIndex = (date.getDay() + 6) % 7; // Adjust so Monday is 0
-            weeklyData[dayIndex]++;
+    // Sort the data by totalKills and totalDeaths in descending order
+    const sortedByKillsAndDeaths = filteredData.sort((a, b) => {
+        // Compare by totalKills first, then totalDeaths if kills are equal
+        if (b.totalKills === a.totalKills) {
+            return b.totalDeaths - a.totalDeaths;
         }
+        return b.totalKills - a.totalKills;
     });
 
-    console.log('Weekly data:', weeklyData); // Add this line for debugging
-    return weeklyData;
+    // Get the top 5 users (or less if there are fewer than 5)
+    return sortedByKillsAndDeaths.slice(0, 5);
 }
 
 onMounted(async () => {
     try {
-        const { settings } = await getAutoResponsersChannelsAndRoles(guildId);
+        const {data} = await getGlobalLeaderboard();
+        console.log(data)
 
-        let openedTicketsChange, closedTicketsChange;
+        const filteredData = data.filter(item => item.serviceId === serviceId);
 
-        if (settings.openedTickets && settings.closedTickets) {
-            openedTicketsChange = calculateTicketChange(settings.openedTickets);
-            closedTicketsChange = calculateTicketChange(settings.closedTickets);
+        const totalKills = filteredData.reduce((sum, item) => sum + item.totalKills, 0);
+    const totalDeaths = filteredData.reduce((sum, item) => sum + item.totalDeaths, 0);
 
+    const top5player = getTopUsersByKillsAndDeaths(serviceId, data)
+    const topUserNames = top5player.map(user => user.dayzGamerTag);
+    
+    const topKills = top5player.map(user => user.totalKills);
+    const topDeaths = top5player.map(user => user.totalDeaths);
+    console.log(topDeaths)
+    chartLabels1.value  = topUserNames
             cards.value = [
                 {
-                    title: 'Opened Tickets',
-                    count: settings.openedTickets.length,
-                    change: openedTicketsChange,
+                    title: 'Total Kills',
+                    count: totalKills,
+                    change: 0,
                     icon: '/images/svg/ticket_create.svg'
                 },
                 {
-                    title: 'Closed Tickets',
-                    count: settings.closedTickets.length,
-                    change: closedTicketsChange,
+                    title: 'Total Death',
+                    count: totalDeaths,
+                    change: 0,
                     icon: '/images/svg/ticket_create.svg'
                 }
             ];
 
-            // Process weekly data for chart
-            const openedWeeklyData = processWeeklyData(settings.openedTickets);
-            const closedWeeklyData = processWeeklyData(settings.closedTickets);
 
             chartDatasets1.value = [
-                { label: 'Opened Tickets', data: openedWeeklyData },
-                { label: 'Closed Tickets', data: closedWeeklyData }
+            { label: 'Total Kills', data: topKills },
+            { label: 'Total Deaths', data: topDeaths }
             ];
-        }
     } catch (error) {
         console.error('Error fetching data:', error);
     } finally {

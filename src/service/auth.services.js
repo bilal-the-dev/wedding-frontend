@@ -2,7 +2,7 @@ import axiosInstance from './api';
 
 export async function getGuilds() {
     try {
-        const res = await axiosInstance.get('/users/@me/guilds?adminOnly=true&botOnlyProp=true');
+        const res = await axiosInstance.get('/services/@me?fields=user');
         const { data, status } = res.data;
         if (status === 'success') {
             return data;
@@ -14,7 +14,7 @@ export async function getGuilds() {
 
 export async function me() {
     try {
-        const res = await axiosInstance.get('/users/@me');
+        const res = await axiosInstance.get('/users/discord/@me');
         const { data, status } = res.data;
         if (status === 'success') {
             return data;
