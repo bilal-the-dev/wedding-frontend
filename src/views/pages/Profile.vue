@@ -131,6 +131,6 @@ const router = useRouter();
 async function logout() {
     await logoutFromApp();
     localStorage.removeItem('userId');
-    router.push('/login');
+    router.push('/');
 }
 </script>

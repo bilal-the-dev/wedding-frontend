@@ -136,9 +136,36 @@ export async function updateAutoResponser(guildId, id, body) {
     }
 }
 
-export async function updateSettings(guildId, body) {
+export async function updateSettings(serviceId, body) {
     try {
-        const res = await axiosInstance.patch(`/guilds/${guildId}/settings`, body);
+        const res = await axiosInstance.patch(`/services/${serviceId}/settings`, body);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+
+export async function stopNitradoServer(serviceId) {
+    try {
+        const res = await axiosInstance.patch(`/services/${serviceId}/stop`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+export async function restartNitradoServer(serviceId) {
+    try {
+        const res = await axiosInstance.patch(`/services/${serviceId}/restart`);
         const { data, status } = res.data;
         if (status === 'success') {
             return data;

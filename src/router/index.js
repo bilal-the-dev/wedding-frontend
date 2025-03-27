@@ -5,7 +5,7 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: '/',
+            path: '/dashboard',
             component: AppLayout,
             meta: { requiresAuth: true },
             children: [
@@ -15,71 +15,45 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
-                    path: '/profile/:id',
+                    path: '/dashboard/profile/:id',
                     name: 'profile',
                     component: () => import('@/views/pages/Profile.vue')
                 },
                 {
-                    path: '/plans/:id',
+                    path: '/dashboard/plans/:id',
                     name: 'plans',
                     component: () => import('@/views/pages/Plans.vue')
                 },
                 {
-                    path: '/settings/:id',
+                    path: '/dashboard/settings/:id',
                     name: 'settings',
                     component: () => import('@/views/pages/Settings.vue')
                 },
                 {
-                    path: '/game/server/:id',
+                    path: '/dashboard/game/server/:id',
                     name: 'gameserver',
                     component: () => import('@/views/pages/GameServer.vue')
                 },
                 {
-                    path: '/economy/settings/:id',
+                    path: '/dashboard/economy/settings/:id',
                     name: 'economySettings',
                     component: () => import('@/views/pages/Economy.vue')
                 },
                 {
-                    path: '/leaderboard/:id',
+                    path: '/dashboard/leaderboard/:id',
                     name: 'leaderboardSettings',
                     component: () => import('@/views/pages/Leaderboard.vue')
                 },
-
-                
+            ]
+        },
+        {
+            path: '/',
+            meta: { guest: true },
+            children : [
                 {
-                    path: '/tickets/panels/:id',
-                    name: 'panels',
-                    component: () => import('@/views/pages/tickets/Panels.vue')
-                },
-                {
-                    path: '/tickets/panels/create/:id',
-                    name: 'panelsCreate',
-                    component: () => import('@/views/pages/tickets/PanelsCreate.vue')
-                },
-                {
-                    path: '/tickets/panels/edit/:panelId/:id',
-                    name: 'panelsEdit',
-                    component: () => import('@/views/pages/tickets/PanelsEdit.vue')
-                },
-                {
-                    path: '/tickets/logs/:id',
-                    name: 'TicketLogs',
-                    component: () => import('@/views/pages/tickets/TicketLogs.vue')
-                },
-                {
-                    path: '/autoresponders/:id',
-                    name: 'autoResponders',
-                    component: () => import('@/views/pages/AutoResponser.vue')
-                },
-                {
-                    path: '/autoresponders/create/:id',
-                    name: 'autoRespondersCreate',
-                    component: () => import('@/views/pages/AutoResponserCreate.vue')
-                },
-                {
-                    path: '/autoresponders/edit/:responserId/:id',
-                    name: 'autoRespondersEdit',
-                    component: () => import('@/views/pages/AutoResponserEdit.vue')
+                    path: '/',
+                    name: 'home',
+                    component: () => import('@/views/pages/auth/login.vue')
                 }
             ]
         },
@@ -116,21 +90,38 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     const userId = localStorage.getItem('userId');
     const isAuthenticated = !!userId;
-
     if (to.matched.some((record) => record.meta.requiresAuth)) {
         if (!isAuthenticated) {
-            next({ name: 'login' });
-        } else {
-            next();
+            return next({ name: 'home' });
         }
     } else if (to.matched.some((record) => record.meta.guest)) {
         if (isAuthenticated) {
-            next({ name: 'servers' });
-        } else {
-            next();
+            return next({ name: 'servers' });
         }
-    } else {
-        next();
     }
+
+    if (to.path.startsWith('/dashboard')) {
+        // Case 1: Exactly '/dashboard' with nothing after
+        if (to.path === '/dashboard') {
+            return next({ name: 'servers' });
+        }
+
+        // Case 2: Check specific dashboard routes that need IDs
+        const pathSegments = to.path.split('/').filter(Boolean); // Remove empty strings
+        
+        // If we have a route like /dashboard/products or /dashboard/profile (without an ID)
+        if (pathSegments.length === 2 && 
+            ['profile', 'plans', 'settings', 'gameserver', 'economySettings', 'leaderboardSettings'].includes(pathSegments[1])) {
+            return next({ name: 'servers' });
+        }
+        
+        // Case 3: For the main dashboard/:id route
+        if (pathSegments.length === 2 && pathSegments[0] === 'dashboard' && 
+            (!to.params.id || to.params.id === '')) {
+            return next({ name: 'servers' });
+        }
+    }
+
+    next();
 });
 export default router;

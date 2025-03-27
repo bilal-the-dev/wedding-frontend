@@ -8,45 +8,64 @@
     </div>
     <div v-else>
 
-    <div  class="card">
-            <PageHeader title="Nitrado Settings" description="Check Your Nitrado Settings" />
-            <div class="flex flex-col gap-6">
-                <div class="flex flex-col gap-2">
-                <label class="text-[#9090a3] font-bold">Server Id</label>
-                <InputText disabled v-model="nitradoSettings.serverName" placeholder="Enter a Text (e.g., trigger, status)" />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label class="text-[#9090a3] font-bold">Nitrado Location</label>
-                <InputText disabled v-model="nitradoSettings.nitradoLocation" placeholder="Enter a Text (e.g., trigger, status)" />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label class="text-[#9090a3] font-bold">DayZ Map</label>
-                <InputText disabled v-model="nitradoSettings.dayZMap" placeholder="Enter a Text (e.g., trigger, status)" />
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label class="text-[#9090a3] font-bold">Game Platform</label>
-                <InputText disabled v-model="nitradoSettings.gamePlatform" placeholder="Enter a Text (e.g., trigger, status)" />
-            </div>
-
-            <div class="flex status gap-2">
-    <label class="text-[#9090a3] font-bold">Nitrado Status</label>
-    <span class="px-3 py-1 text-white text-sm font-semibold rounded bg-blue-500">
-        {{nitradoSettings.status.toUpperCase()}}
-    </span>
-</div>
-<div class="flex status gap-2">
-    <label class="text-[#9090a3] font-bold">Nitrado Resets</label>
-    <span class="px-3 py-1 text-white text-sm font-semibold rounded bg-green-500">
-        {{nitradoSettings.nitradoReset.toUpperCase()}}
-    </span>
-</div>
-
-            </div>
-            
+        <div class="card">
+    <PageHeader title="Nitrado Settings" description="Check Your Nitrado Settings" />
+    <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-2">
+            <label class="text-[#9090a3] font-bold">Server Id</label>
+            <InputText disabled v-model="nitradoSettings.serverName" placeholder="Enter a Text (e.g., trigger, status)" />
         </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="text-[#9090a3] font-bold">Nitrado Location</label>
+            <InputText disabled v-model="nitradoSettings.nitradoLocation" placeholder="Enter a Text (e.g., trigger, status)" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="text-[#9090a3] font-bold">DayZ Map</label>
+            <InputText disabled v-model="nitradoSettings.dayZMap" placeholder="Enter a Text (e.g., trigger, status)" />
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label class="text-[#9090a3] font-bold">Game Platform</label>
+            <InputText disabled v-model="nitradoSettings.gamePlatform" placeholder="Enter a Text (e.g., trigger, status)" />
+        </div>
+
+        <div class="flex status gap-2">
+            <label class="text-[#9090a3] font-bold">Nitrado Status</label>
+            <span class="px-3 py-1 text-white text-sm font-semibold rounded bg-blue-500">
+                {{ nitradoSettings.status.toUpperCase() }}
+            </span>
+        </div>
+        <div class="flex status gap-2">
+            <label class="text-[#9090a3] font-bold">Nitrado Resets</label>
+            <span class="px-3 py-1 text-white text-sm font-semibold rounded bg-green-500">
+                {{ nitradoSettings.nitradoReset.toUpperCase() }}
+            </span>
+        </div>
+
+        <!-- Server Control Section -->
+        <div class="flex flex-col gap-4">
+            <label class="text-[#9090a3] font-bold">Nitrado Resets</label>
+    <div class="flex gap-6">
+        <!-- Stop Server Button -->
+        <button @click="stopServer"
+            class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-red-700/80 hover:bg-red-700 shadow-lg text-white font-semibold 
+                   backdrop-blur-lg transition-all duration-300 transform hover:scale-105 hover:shadow-red-500/50">
+            <i class="pi pi-power-off text-lg"></i> Stop Server
+        </button>
+
+        <!-- Restart Server Button -->
+        <button @click="restartServer"
+            class="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-yellow-500/80 hover:bg-yellow-500 text-black font-semibold 
+                   shadow-lg backdrop-blur-lg transition-all duration-300 transform hover:scale-105 hover:shadow-yellow-400/50">
+            <i class="pi pi-refresh text-lg"></i> Restart Server
+        </button>
+    </div>
+</div>
+
+    </div>
+</div>
 
 
         <div class="card">
@@ -68,15 +87,18 @@ import { useRoute } from 'vue-router';
 
 import PageHeader from '../../components/PageHeader.vue';
 import ToggleBar from '../../components/ToggleBar.vue';
-import { getNitradoSettings } from '../../service/settings.services';
+import { getNitradoSettings, restartNitradoServer, stopNitradoServer, updateSettings } from '../../service/settings.services';
 
-import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import CustomProgressSpinner from '../../components/CustomProgressSpinner.vue';
 
 const isLoading = ref(true);
-const confirm = useConfirm();
 const toast = useToast();
+const isDropdownOpen = ref(false);
+
+const toggleDropdown = () => {
+    isDropdownOpen.value = !isDropdownOpen.value;
+};
 
 const nitradoSettings = ref({
     serverName: "", 
@@ -87,6 +109,37 @@ const nitradoSettings = ref({
     nitradoReset: ""
 });
 
+const stopServer = async () => {
+
+    const id = route.params.id;
+    isLoading.value = true;
+    try {
+        await stopNitradoServer(id);
+        const { data } = await getNitradoSettings(id);
+        nitradoSettings.value.status = data.status;
+        toast.add({ severity: "success", summary: "Success", detail: "Server stopping now!", life: 3000 });
+    } catch (error) {
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to stop server!", life: 3000 });
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const restartServer = async () => {
+
+    const id = route.params.id;
+    isLoading.value = true;
+    try {
+        await restartNitradoServer(id);
+        const { data } = await getNitradoSettings(id);
+        nitradoSettings.value.status = data.status;
+        toast.add({ severity: "success", summary: "Success", detail: "Server restarting now!", life: 3000 });
+    } catch (error) {
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to restart server!", life: 3000 });
+    } finally {
+        isLoading.value = false;
+    }
+};
 const killfeedSettings = ref([]);
 const route = useRoute();
 
@@ -156,11 +209,11 @@ async function updateSettingViaAPI(setting) {
         // Prepare the payload for API call
         const payload = {
             key: setting.key,
-            value: setting.val
+            value: setting.val ? 1 : 0,
         };
 
-        // Call the update API
-       console.log(payload);
+
+        await updateSettings(id, payload)
 
         // Show success toast
         toast.add({ 

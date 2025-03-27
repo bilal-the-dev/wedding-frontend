@@ -27,7 +27,9 @@ const showManageButton = (server) => {
 };
 
 
-
+const truncateText = (text, length) => {
+  return text.length > length ? text.substring(0, length) + "..." : text;
+};
 const saveIdToLocalStorage = () => {
     localStorage.setItem('serviceId', selectedServer.value.serviceId);
 };
@@ -83,7 +85,7 @@ const saveIdToLocalStorage = () => {
       <!-- Server Name -->
       <h3 class="text-[20px] font-semibold text-gray-100">{{ server.guild ? server.guild.name : 'Not connected' }}</h3>
       <!-- Subtitle -->
-      <span class="text-[14px] text-gray-400">{{ server.serviceName }}</span>
+      <span class="text-[14px] text-gray-400">{{ truncateText(server.serviceName,15) }}</span>
 
       <!-- Status Section -->
       <div class="mt-2">

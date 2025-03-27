@@ -1,6 +1,7 @@
 <script setup>
+import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getGuilds } from '../service/auth.services';
 import AppMenuItem from './AppMenuItem.vue';
 const cities = ref([
@@ -12,7 +13,9 @@ const cities = ref([
 ]);
 
 const route = useRoute();
+const router  = useRouter();
 
+const toast = useToast();
 const urlId = route.params.id;
 const services = ref([]);
 const selectedCity = ref();
@@ -23,10 +26,11 @@ const allMenuItems = [
         items: [
             { label: 'Overview', icon: 'pi pi-fw pi-eye', to: `/dashboard`, alone : "/dashboard", params : true },
             { label: 'Servers', icon: 'pi pi-fw pi-database', to: '/servers', alone : "/servers", params : false },
-            { label: 'Plans', icon: 'pi pi-fw pi-credit-card', to: `/plans/`, alone : "/plans", params : true },
-            { label: 'Game Server', icon: 'pi pi-fw pi-spin pi-cog', to: `/game/server` ,alone : "/game/server" , params : true },
-            { label: 'Economy', icon: 'pi pi-fw pi-money-bill', to: `/economy/settings` ,alone : "/economy/settings" , params : true },
-            { label: 'Leaderboard', icon: 'pi pi-fw pi-sort-alt', to: `/leaderboard` ,alone : "/leaderboard" , params : true },
+            { label: 'Plans', icon: 'pi pi-fw pi-credit-card', to: `/dashboard/plans/`, alone : "/dashboard/plans", params : true },
+            { label: 'Game Server', icon: 'pi pi-fw pi-spin pi-cog', to: `/dashboard/game/server` ,alone : "/dashboard/game/server" , params : true },
+            { label: 'Economy', icon: 'pi pi-fw pi-money-bill', to: `/dashboard/economy/settings` ,alone : "/dashboard/economy/settings" , params : true },
+            { label: 'Leaderboard', icon: 'pi pi-fw pi-sort-alt', to: `/dashboard/leaderboard` ,alone : "/dashboard/leaderboard" , params : true },
+            { label: 'Profile', icon: 'pi pi-fw pi-user', to: `/dashboard/profile` ,alone : "/dashboard/profile" , params : true },
         ]
     },
 ];
@@ -54,9 +58,30 @@ onMounted(async () => {
         console.error('Error fetching guilds:', error);
     }
 });
+
+
+const navigateToDashboard = () => {
+  if (selectedCity.value) {
+    
+    // Show toast notification
+    toast.add({
+      severity: "success",
+      summary: "Guild Changed",
+      detail: `Successfully switched to ${selectedCity.value.name}`,
+      life: 3000,
+    });
+
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+      router.push(`/dashboard/${selectedCity.value.serviceId}`);
+    }, 500); // Delay to allow toast to be seen
+  }
+};
 </script>
 
 <template>
+    
+    <Toast/>
     <div class="flex  items-center p-4">
   <img src="/public/images/png/logo.png" alt="Logo" class="h-16 w-16" />
   <span class="text-[35px] font-medium text-gray-200 ml-4">KillFeed</span>

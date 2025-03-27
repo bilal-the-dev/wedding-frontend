@@ -18,7 +18,7 @@
 
     <!-- Menu items for larger screens -->
     <div class="hidden lg:flex items-center gap-10">
-      <a href="#status" class="text-gray-300 hover:text-white text-xl font-bold transition">Status</a>
+      <a href="/heatmap" class="text-gray-300 hover:text-white text-xl font-bold transition">Global Heatmap</a>
       <a href="#invite" class="text-gray-300 hover:text-white text-xl font-bold transition">Invite</a>
       <a href="#premium" class="flex items-center text-yellow-400 hover:text-yellow-300 text-xl font-bold transition">
         <span class="mr-2">✨</span>
@@ -29,7 +29,7 @@
 
     <!-- Mobile menu items (hidden by default) -->
     <div v-if="menuOpen" class="lg:hidden absolute top-16 left-0 w-full bg-gray-800 text-white p-4">
-      <a href="#status" class="block py-4 px-6 text-lg font-bold hover:bg-gray-700 transition">Status</a>
+      <a href="/heatmap" class="block py-4 px-6 text-lg font-bold hover:bg-gray-700 transition">Global Heatmap</a>
       <a href="#invite" class="block py-4 px-6 text-lg font-bold hover:bg-gray-700 transition">Invite</a>
       <a href="#premium" class="block py-4 px-6 text-lg font-bold hover:bg-gray-700 transition">Premium</a>
       <button class="block w-full py-4 px-6 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-2xl font-bold" @click="login">Login</button>

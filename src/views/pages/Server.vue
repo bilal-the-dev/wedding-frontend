@@ -17,7 +17,7 @@
         />
 
         <!-- User Name -->
-        <span class="text-[16px] text-gray-200 hidden sm:block">{{"Benluka.pp" }}</span>
+        <span class="text-[16px] text-gray-200 hidden sm:block">{{ user.name }}</span>
 
 
         <!-- Popover -->
@@ -30,7 +30,7 @@
                 alt="User Avatar"
                 class="w-8 h-8 rounded-full border-2 border-gray-300"
               />
-              <span class="font-medium text-gray-100">{{ "Benluka.pp"}}</span>
+              <span class="font-medium text-gray-100">{{ user.name }}</span>
             </div>
 
             <!-- Separator Line -->
@@ -126,7 +126,7 @@ const router = useRouter();
 async function logout() {
     await logoutFromApp();
     localStorage.removeItem('userId');
-    router.push('/login');
+    router.push('/');
 }
 </script>
 

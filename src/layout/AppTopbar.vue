@@ -16,14 +16,14 @@ const guildId = route.params.id;
 async function goToProfile() {
     // await axiosInstance.post('/auth/discord/logout');
     // localStorage.removeItem('userData');
-    router.push(`/profile/${guildId}`);
+    router.push(`/dashboard/profile/${guildId}`);
 }
 
 
 async function logout() {
     await logoutFromApp();
     localStorage.removeItem('userId');
-    router.push(`/login`);
+    router.push(`/`);
 }
 
 
