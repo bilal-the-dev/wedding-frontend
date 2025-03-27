@@ -1,5 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { getGuilds } from '../service/auth.services';
 import AppMenuItem from './AppMenuItem.vue';
 const cities = ref([
     { name: 'New York', code: 'NY' },
@@ -9,7 +11,12 @@ const cities = ref([
     { name: 'Paris', code: 'PRS' }
 ]);
 
+const route = useRoute();
+
+const urlId = route.params.id;
+const services = ref([]);
 const selectedCity = ref();
+
 const allMenuItems = [
     {
         label: 'DayZ',
@@ -25,6 +32,28 @@ const allMenuItems = [
 ];
 ;
 const model = ref(allMenuItems);
+
+function truncateName(name) {
+  return name.length > 15 ? name.slice(0, 15) + "..." : name;
+}
+
+onMounted(async () => {
+    try {
+        const {data} = await getGuilds();
+        services.value = data
+
+  .map((guild) => ({
+    name: truncateName(guild.identifier),
+    guildId : guild.guildId,
+    avatar: guild.guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.guild.icon}.png` : "/discordlogo.png",
+    serviceId : guild.serviceId
+  }))
+
+  selectedCity.value = services.value.find(service => service.serviceId === urlId) || null;
+    } catch (error) {
+        console.error('Error fetching guilds:', error);
+    }
+});
 </script>
 
 <template>
@@ -34,8 +63,40 @@ const model = ref(allMenuItems);
 </div>
 
 <div class="flex justify-center">
-        <Select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Select a City" class="w-full md:w-68 " />
-    </div>
+    <Select 
+  v-model="selectedCity" 
+  :options="services" 
+  optionLabel="name" 
+  placeholder="Select a City" 
+  class="w-full md:w-80 py-1 text-lg" 
+  style="height: 50px;" 
+  @change="navigateToDashboard"
+>
+    <!-- Selected Value Display -->
+    <template #value="slotProps">
+        <div v-if="slotProps.value" class="flex items-center">
+            <img :src="slotProps.value.avatar" :alt="slotProps.value.name" class="mr-3 rounded-xl" style="width: 32px; height: 32px; object-fit: cover;" />
+            <div class="text-lg">{{ slotProps.value.name }}</div>
+        </div>
+        <span v-else class="text-lg">
+            {{ slotProps.placeholder }}
+        </span>
+    </template>
+
+    <!-- Dropdown Option Display -->
+    <template #option="slotProps">
+        <div class="flex items-center py-2">
+            <img :src="slotProps.option.avatar" :alt="slotProps.option.name" class="mr-3 rounded-xl" style="width: 32px; height: 32px; object-fit: cover;" />
+            <div class="text-lg">{{ slotProps.option.name }}</div>
+        </div>
+    </template>
+
+    <template #dropdownicon>
+        <i class="pi pi-map text-lg" />
+    </template>
+</Select>
+
+</div>
 
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="i">

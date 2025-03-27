@@ -33,7 +33,6 @@ const user = ref({
 });
 onMounted(async () => {
     const {data}  = await me()
-    console.log(data)
     user.value.name = data.global_name;
    user.value.avatar =  `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`;
 })

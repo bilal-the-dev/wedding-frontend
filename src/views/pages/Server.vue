@@ -4,7 +4,7 @@
       <!-- Left Side: Logo -->
       <div class="flex items-center space-x-3 ml-4">
         <img src="/images/png/logo.png" alt="Logo" class="h-16 w-16" />
-        <h1 class="text-[28px] font-semibold text-gray-200">KillField</h1>
+        <h1 class="text-[28px] font-semibold text-gray-200">KillFeed</h1>
       </div>
 
       <!-- Right Side: Avatar, Name, and Popover -->

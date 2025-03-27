@@ -10,7 +10,6 @@ const { primaryColors, surfaces, getPresetExtColor } = useThemeSetting();
 const initialPreset = () => {
     const primaryColor = primaryColors.value.find((c) => c.name === settingService.getPrimaryTheme());
     const presetColor = getPresetExtColor(primaryColor);
-    console.log(presetColor);
     updatePreset(presetColor);
 };
 

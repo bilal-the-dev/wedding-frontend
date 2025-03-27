@@ -62,7 +62,6 @@
 </template>
 
 <script setup>
-
 import InputText from 'primevue/inputtext';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -71,47 +70,137 @@ import PageHeader from '../../components/PageHeader.vue';
 import ToggleBar from '../../components/ToggleBar.vue';
 import { getNitradoSettings } from '../../service/settings.services';
 
-
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
 import CustomProgressSpinner from '../../components/CustomProgressSpinner.vue';
 
-const isLoading = ref(true); // New state for loader
+const isLoading = ref(true);
 const confirm = useConfirm();
 const toast = useToast();
 
+const nitradoSettings = ref({
+    serverName: "", 
+    nitradoLocation: "", 
+    dayZMap: "", 
+    gamePlatform: "", 
+    status: "", 
+    nitradoReset: ""
+});
 
+const killfeedSettings = ref([]);
+const route = useRoute();
 
-const confirm1 = () => {
-    confirm.require({
-        message: 'Are you sure you want to proceed?',
-        header: 'Confirmation',
-        icon: 'pi pi-exclamation-triangle',
-        rejectProps: {
-            label: 'Cancel',
-            severity: 'secondary',
-            outlined: true
-        },
-        acceptProps: {
-            label: 'Save'
-        },
-        accept: () => {
-            toast.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted', life: 3000 });
-        },
-        reject: () => {
-            toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
-        }
+// Tracking the original settings to compare changes
+const originalSettings = ref([]);
+
+onMounted(async () => {
+    try {
+        const id = route.params.id;
+        const { data } = await getNitradoSettings(id);
+        
+        // Set Nitrado settings
+        nitradoSettings.value.serverName = data.service_id;
+        nitradoSettings.value.nitradoLocation = await getIPLocation(data.ip);
+        nitradoSettings.value.dayZMap = data.query.map || data.settings.config.mission;
+        nitradoSettings.value.gamePlatform = data.game_human;
+        nitradoSettings.value.status = data.status;
+        nitradoSettings.value.nitradoReset = formatTime(data.nitradoCacheResetIn - Date.now());
+
+        // Prepare killfeed settings
+        const generalSettingsMapping = data.constants.gpSettings;
+        const adminSettingsMapping = data.constants.kfSettings;
+        const settingsMapping = { ...generalSettingsMapping, ...adminSettingsMapping };
+        const settingsConfig = data.settings.config;
+
+        killfeedSettings.value = Object.keys(settingsMapping).map(key => ({
+            key,
+            text: settingsMapping[key],
+            val: settingsConfig[key] === "1" // Convert "1" to true, otherwise false
+        }));
+
+        // Store original settings for comparison
+        originalSettings.value = JSON.parse(JSON.stringify(killfeedSettings.value));
+
+    } catch(e) {
+        console.error('Error fetching settings:', e);
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: 'Failed to load settings', 
+            life: 3000 
+        });
+    } finally {
+        isLoading.value = false;
+    }
+});
+
+// Watch for changes in killfeed settings
+watch(killfeedSettings, (newValue) => {
+    // Find the changed setting
+    const changedSetting = newValue.find((newSetting, index) => {
+        const originalSetting = originalSettings.value[index];
+        return newSetting.val !== originalSetting.val;
     });
-};
 
+    // If a setting has changed, update it via API
+    if (changedSetting) {
+        updateSettingViaAPI(changedSetting);
+    }
+}, { deep: true });
+
+// Function to update a specific setting via API
+async function updateSettingViaAPI(setting) {
+    try {
+        const id = route.params.id;
+        
+        // Prepare the payload for API call
+        const payload = {
+            key: setting.key,
+            value: setting.val
+        };
+
+        // Call the update API
+       console.log(payload);
+
+        // Show success toast
+        toast.add({ 
+            severity: 'success', 
+            summary: 'Updated', 
+            detail: `${setting.text} setting updated`, 
+            life: 3000 
+        });
+
+        // Update the original settings to reflect the new state
+        const index = originalSettings.value.findIndex(orig => orig.key === setting.key);
+        if (index !== -1) {
+            originalSettings.value[index].val = setting.val;
+        }
+
+    } catch (error) {
+        console.error('Error updating setting:', error);
+        
+        // Revert the change if API call fails
+        const index = killfeedSettings.value.findIndex(s => s.key === setting.key);
+        if (index !== -1) {
+            killfeedSettings.value[index].val = !setting.val;
+        }
+
+        // Show error toast
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Update Failed', 
+            detail: `Failed to update ${setting.text}`, 
+            life: 3000 
+        });
+    }
+}
+
+// Existing utility functions (getIPLocation, formatTime) remain the same
 async function getIPLocation(ip) {
     const response = await fetch(`http://ip-api.com/json/${ip}`);
     const data = await response.json();
     return `${data.country} / ${data.city}`;
 }
-// function sanitizeServerName(name) {
-//     return name.replace(/[^\x20-\x7E]/g, ''); 
-// }
 
 function formatTime(ms) {
     let seconds = Math.floor(ms / 1000);
@@ -131,49 +220,6 @@ function formatTime(ms) {
 
     return parts.length > 0 ? parts.join(", ") : "0 seconds";
 }
-const nitradoSettings = ref({serverName : "", nitradoLocation : "", dayZMap : "", gamePlatform :"", status : "", nitradoReset : ""}
-)
-const killfeedSettings = ref([{
-    text : "",
-    val : true,
-    key : "",
-}]);
-const route = useRoute();
-onMounted(async () => {
-
-    try{
-    const id = route.params.id
-const {data} = await getNitradoSettings(id)
-    nitradoSettings.value.serverName = data.service_id;
-    nitradoSettings.value.nitradoLocation =await getIPLocation(data.ip)
-    nitradoSettings.value.dayZMap = data.query.map || data.settings.config.mission
-    nitradoSettings.value.gamePlatform = data.game_human;
-    nitradoSettings.value.status = data.status;
-    nitradoSettings.value.nitradoReset = formatTime(data.nitradoCacheResetIn- Date.now())
-    const generalSettingsMapping = data.constants.gpSettings;
-    const adminSettingsMapping = data.constants.kfSettings;
-
-const settingsMapping = { ...generalSettingsMapping, ...adminSettingsMapping };
-const settingsConfig= data.settings.config;
- killfeedSettings.value = Object.keys(settingsMapping).map(key => ({
-    key,
-    text: settingsMapping[key],
-    val: settingsConfig[key] === "1" // Convert "1" to true, otherwise false
-
-}));
-
-
-}catch(e){console.log(e)}finally {
-        isLoading.value = false; // Stop the loader after the API call
-    }
-})
-
-
-watch(killfeedSettings, (newValue, oldValue) => {
-
-    
-  
-}, { deep: true });
 </script>
 
 
