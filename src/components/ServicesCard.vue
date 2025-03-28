@@ -74,7 +74,7 @@ const saveIdToLocalStorage = () => {
     <!-- Left Side: Avatar Image -->
     <div class="flex items-center">
       <img 
-      :src="(server.guild && server.guild.icon) ? `https://cdn.discordapp.com/icons/${server.guild.id}/${server.guild.icon}.png` : '/public/images/png/default.png'" 
+      :src="(server.guild && server.guild.icon) ? `https://cdn.discordapp.com/icons/${server.guild.id}/${server.guild.icon}.png` : '/images/png/default.png'" 
         alt="Avatar" 
         class="w-24 h-24 rounded-full border-2 border-gray-300"
       />
