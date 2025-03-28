@@ -49,7 +49,7 @@ onMounted(async () => {
   .map((guild) => ({
     name: truncateName(guild.identifier),
     guildId : guild.guildId,
-    avatar: guild.guild.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.guild.icon}.png` : "/discordlogo.png",
+    avatar: guild.guild?.icon ? `https://cdn.discordapp.com/icons/${guild.guildId}/${guild.guild.icon}.png` : "/discordlogo.png",
     serviceId : guild.serviceId
   }))
 
