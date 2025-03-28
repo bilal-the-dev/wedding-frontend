@@ -16,10 +16,6 @@
             <InputText disabled v-model="nitradoSettings.serverName" placeholder="Enter a Text (e.g., trigger, status)" />
         </div>
 
-        <div class="flex flex-col gap-2">
-            <label class="text-[#9090a3] font-bold">Nitrado Location</label>
-            <InputText disabled v-model="nitradoSettings.nitradoLocation" placeholder="Enter a Text (e.g., trigger, status)" />
-        </div>
 
         <div class="flex flex-col gap-2">
             <label class="text-[#9090a3] font-bold">DayZ Map</label>
@@ -153,7 +149,7 @@ onMounted(async () => {
         
         // Set Nitrado settings
         nitradoSettings.value.serverName = data.service_id;
-        nitradoSettings.value.nitradoLocation = await getIPLocation(data.ip);
+        // nitradoSettings.value.nitradoLocation = await getIPLocation(data.ip);
         nitradoSettings.value.dayZMap = data.query.map || data.settings.config.mission;
         nitradoSettings.value.gamePlatform = data.game_human;
         nitradoSettings.value.status = data.status;
