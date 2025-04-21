@@ -52,6 +52,20 @@ export async function getGlobalLeaderboard() {
     }
 }
 
+export async function getservicesLeaderboard(id) {
+    try {
+        const res = await axiosInstance.get(`/services/${id}/leaderboards`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+
 
 export async function updateStatsSettings(serviceId, body) {
     try {
@@ -166,6 +180,18 @@ export async function stopNitradoServer(serviceId) {
 export async function restartNitradoServer(serviceId) {
     try {
         const res = await axiosInstance.patch(`/services/${serviceId}/restart`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+export async function updateAccessroles(serviceId, body) {
+    try {
+        const res = await axiosInstance.patch(`/services/${serviceId}/access`, body);
         const { data, status } = res.data;
         if (status === 'success') {
             return data;

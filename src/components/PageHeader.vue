@@ -6,7 +6,7 @@
       </div>
       <p class="text-[20px] mt-3 text-[#9a9aa9]">{{ stats }}</p>
     </div>
-    <p class="text-[15px] mt-3 text-[#9a9aa9]" v-if="description">{{ description }}</p>
+    <p class="text-[15px]  text-[#9a9aa9]" v-if="description">{{ description }}</p>
     <CustomSeprator />
   </template>
   

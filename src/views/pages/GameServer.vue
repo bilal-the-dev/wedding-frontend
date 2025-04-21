@@ -19,7 +19,7 @@
 
         <div class="flex flex-col gap-2">
             <label class="text-[#9090a3] font-bold">DayZ Map</label>
-            <InputText disabled v-model="nitradoSettings.dayZMap" placeholder="Enter a Text (e.g., trigger, status)" />
+            <Select v-model="selectedCity" :options="maps" optionLabel="name" placeholder="Select a City" class="w-full md:w-56" />
         </div>
 
         <div class="flex flex-col gap-2">
@@ -95,7 +95,8 @@ const isDropdownOpen = ref(false);
 const toggleDropdown = () => {
     isDropdownOpen.value = !isDropdownOpen.value;
 };
-
+const selectedCity = ref();
+const maps = ref([]);
 const nitradoSettings = ref({
     serverName: "", 
     nitradoLocation: "", 
@@ -146,7 +147,8 @@ onMounted(async () => {
     try {
         const id = route.params.id;
         const { data } = await getNitradoSettings(id);
-        
+        maps.value = data.maps;
+        selectedCity.value = maps.value.find(map => map.value === data.settings.config.mission || data.query.map);
         // Set Nitrado settings
         nitradoSettings.value.serverName = data.service_id;
         // nitradoSettings.value.nitradoLocation = await getIPLocation(data.ip);
@@ -207,8 +209,7 @@ async function updateSettingViaAPI(setting) {
             key: setting.key,
             value: setting.val ? 1 : 0,
         };
-
-
+        console.log(payload);
         await updateSettings(id, payload)
 
         // Show success toast
@@ -269,6 +270,41 @@ function formatTime(ms) {
 
     return parts.length > 0 ? parts.join(", ") : "0 seconds";
 }
+
+let isInitialLoad = true;
+
+watch(selectedCity, async (newValue, oldValue) => {
+    if (isInitialLoad) {
+        isInitialLoad = false;
+        return; // Skip the first run
+    }
+
+    try {
+        const id = route.params.id;
+        const payload = {
+            key: "mission",
+            value: newValue.value
+        };
+
+        await updateSettings(id, payload);
+
+        toast.add({ 
+            severity: 'success', 
+            summary: 'Updated', 
+            detail: `${newValue.name} is updated as map`, 
+            life: 3000 
+        });
+
+    } catch (error) {
+        toast.add({ 
+            severity: 'error', 
+            summary: 'Update Failed', 
+            detail: error,
+            life: 3000 
+        });
+    }
+});
+
 </script>
 
 
@@ -282,11 +318,12 @@ function formatTime(ms) {
     width: 100%;
     max-width: 32rem;
     height: 3.6rem;
-    background-color: #172135;
+    background-color: transparent;
 }
 :deep(.p-select-label) {
     padding-top: 1rem;
 }
+
 
 :deep(.p-inputtext) {
     width: 100%;

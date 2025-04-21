@@ -84,7 +84,7 @@ const navigateToDashboard = () => {
     <Toast/>
     <div class="flex  items-center p-4">
   <img src="/public/images/png/logo.png" alt="Logo" class="h-16 w-16" />
-  <span class="text-[35px] font-medium text-gray-200 ml-4">KillFeed</span>
+  <span class="text-[20px] font-medium text-gray-200 ml-4">DayZ Manager™</span>
 </div>
 
 <div class="flex justify-center">

@@ -8,7 +8,7 @@
     <div v-else>
         <div class="card flex flex-col gap-4">
 
-        <PageHeader title="Global Leaderboard" />
+        <PageHeader title="Service Leaderboard" description="Leaderboard with most kills and deaths of current service"/>
         <div class="flex flex-col gap-4 mb-4">
             <label class="text-[#9090a3] font-bold">Search </label>
             <CustomTextField customWidth="max-w-[120rem]" :isIcon="true" iconSrc="/images/svg/textField_icon.svg" v-model="textInput" placeholder="Enter a keyword (e.g. Rank, Username, Kills)" />
@@ -47,46 +47,6 @@
         
     </div>
 
-    <div class="card flex flex-col gap-4">
-
-<PageHeader title="Server Leaderboard" />
-<div class="flex flex-col gap-4 mb-4">
-    <label class="text-[#9090a3] font-bold">Search </label>
-    <CustomTextField customWidth="max-w-[120rem]" :isIcon="true" iconSrc="/images/svg/textField_icon.svg" v-model="serverTextInput" placeholder="Enter a keyword (e.g., service Id, serverName, server Label)" />
-</div>
-
-<!-- Custom DataTable -->
-<div class="card rounded-lg overflow-hidden">
-    <DataTable :value="filteredServerLogs" tableStyle="min-width: 70rem; width: 100%;" class="custom-datatable">
-        <Column field="rank" header="Rank" style="width: 15%">
-            <template #body="slotProps">
-                <p class="text-large data-cell">{{ slotProps.data.rank }}</p>
-            </template>
-        </Column>
-        <Column field="serviceId" header="Server ID" style="width: 15%">
-            <template #body="slotProps">
-                <p class="text-large data-cell">{{ slotProps.data.serviceId }}</p>
-            </template>
-        </Column>
-        <Column field="serviceName" header="Server Name" style="width: 15%">
-            <template #body="slotProps">
-                <p class="text-large data-cell">{{ slotProps.data.serviceName }}</p>
-            </template>
-        </Column>
-        <Column field="serverLabel" header="Server Label" style="width: 15%">
-            <template #body="slotProps">
-                <p class="text-large data-cell">{{ slotProps.data.serverLabel }}</p>
-            </template>
-        </Column>
-        <Column field="totalkills" header="Total Kills" style="width: 15%">
-            <template #body="slotProps">
-                <p class="text-large data-cell">{{ slotProps.data.totalKills }}</p>
-            </template>
-        </Column>
-    </DataTable>
-</div>
-
-</div>
     </div>
 </template>
 
@@ -95,10 +55,10 @@ import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import CustomProgressSpinner from '../../components/CustomProgressSpinner.vue'; // Assuming you have this component for loading spinner
+import CustomProgressSpinner from '../../components/CustomProgressSpinner.vue';
 import CustomTextField from '../../components/CustomTextField.vue';
 import PageHeader from '../../components/PageHeader.vue';
-import { getGlobalLeaderboard } from '../../service/settings.services';
+import { getservicesLeaderboard } from '../../service/settings.services';
 const route = useRoute();
 
 const globalRanks = ref([]);
@@ -154,7 +114,7 @@ function getServerRanks(data) {
 
 onMounted(async () => {
     try {
-        const {data} = await getGlobalLeaderboard();
+        const {data} = await getservicesLeaderboard(route.params.id)
         globalRanks.value = assignRankings(data)
        
 

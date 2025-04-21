@@ -23,6 +23,28 @@ export async function me() {
         console.log(e);
     }
 }
+export async function getRoles(guildId) {
+    try {
+        const res = await axiosInstance.get(`/guilds/${guildId}/roles`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
+export async function getServiceData(guildId) {
+    try {
+        const res = await axiosInstance.get(`/services/${guildId}`);
+        const { data, status } = res.data;
+        if (status === 'success') {
+            return data;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 export async function logoutFromApp() {
     try {

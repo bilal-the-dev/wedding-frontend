@@ -4,7 +4,7 @@
       <!-- Left Side: Logo -->
       <div class="flex items-center space-x-3 ml-4">
         <img src="/images/png/logo.png" alt="Logo" class="h-16 w-16" />
-        <h1 class="text-[28px] font-semibold text-gray-200">KillFeed</h1>
+        <h1 class="text-[28px] font-semibold text-gray-200">DayZ Manager™</h1>
            <a
         href="/heatmap/"
         class="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition duration-300"

@@ -1,14 +1,76 @@
 <template>
-    <PageHeader title="Leaderboard" description="Check Global and Server Leaderboard" />
+    <!-- Hero Header -->
+    <nav class="px-6 py-4 flex items-center justify-between max-w-7xl mx-auto relative  shadow-lg">
+  <a href="/" class="flex items-center space-x-4">
+    <img src="/images/png/logo.png" alt="Logo" class="h-16 w-16 transition-transform hover:scale-110" />
+    <h1 class="hidden sm:block text-2xl font-semibold text-gray-200">DayZ Manager™</h1>
+  </a>
+
+  <!-- Mobile menu button -->
+  <div class="lg:hidden">
+    <button @click="menuOpen = !menuOpen" class="text-gray-300 hover:text-white text-white transition-transform transform hover:scale-110">
+      <svg v-if="!menuOpen" class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <svg v-else class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Menu items for larger screens -->
+  <div class="hidden lg:flex items-center gap-8">
+    <a href="/heatmap" class="text-gray-300 hover:text-white text-lg font-medium transition-all duration-300">Global Heatmap</a>
+    <a href="/global/leaderboard" class="text-gray-300 hover:text-white text-lg font-medium transition-all duration-300">Global Leaderboard</a>
+    <a href="#invite" class="text-gray-300 hover:text-white text-lg font-medium transition-all duration-300">Invite</a>
+    <a href="https://www.patreon.com/TheKillFeed" class="flex items-center text-yellow-400 hover:text-yellow-300 text-lg font-medium transition-all duration-300">
+      <span class="mr-2 animate-pulse">✨</span> Premium
+    </a>
+    <button class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 font-semibold" @click="login">Login</button>
+  </div>
+
+  <!-- Mobile menu items -->
+  <transition name="fade">
+    <div v-if="menuOpen" class="lg:hidden fixed inset-0 bg-gray-900  flex flex-col items-center justify-center space-y-6 z-50">
+      <button @click="menuOpen = false" class="absolute top-5 right-6 text-gray-300 hover:text-white transition-transform transform hover:scale-110">
+        <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <a href="/heatmap" class="text-white text-xl font-semibold hover:text-gray-300 transition-all duration-300">Global Heatmap</a>
+      <a href="/global/leaderboard" class="text-gray-300 hover:text-white text-lg font-medium transition-all duration-300">Global Leaderboard</a>
+      <a href="#invite" class="text-white text-xl font-semibold hover:text-gray-300 transition-all duration-300">Invite</a>
+      <a href="#premium" class="text-yellow-400 text-xl font-semibold hover:text-yellow-300 transition-all duration-300">Premium</a>
+      <button class="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 text-2xl font-semibold" @click="login">Login</button>
+    </div>
+  </transition>
+</nav>
+
+<header class="relative w-full h-80 flex flex-col items-center justify-center text-center bg-cover bg-center my-16 px-16">
+    <!-- Gradient Overlay -->
+    <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+
+    <!-- Header Content -->
+    <div class="relative z-10 text-white px-4">
+      <h2 class="text-4xl sm:text-5xl font-extrabold drop-shadow-lg animate-fade-in">
+        🏆 Global & Server Leaderboards
+      </h2>
+      <p class="text-lg sm:text-xl mt-2 opacity-90">
+        Stay on top of the action. See who dominates the battlefield with live ranking updates 
+      </p>
+
+     
+    </div>
+  </header>
 
     <div v-if="isLoading" class="flex justify-center items-center h-64">
         <CustomProgressSpinner />
     </div>
 
-    <div v-else>
+    <div v-else class="px-16">
         <div class="card flex flex-col gap-4">
 
-        <PageHeader title="Global Leaderboard" />
+        <PageHeader title="Global Leaderboard" description="Top Players across all services"/>
         <div class="flex flex-col gap-4 mb-4">
             <label class="text-[#9090a3] font-bold">Search </label>
             <CustomTextField customWidth="max-w-[120rem]" :isIcon="true" iconSrc="/images/svg/textField_icon.svg" v-model="textInput" placeholder="Enter a keyword (e.g. Rank, Username, Kills)" />
@@ -49,7 +111,7 @@
 
     <div class="card flex flex-col gap-4">
 
-<PageHeader title="Server Leaderboard" />
+<PageHeader title="Server Leaderboard" description="Top Services with most kills"/>
 <div class="flex flex-col gap-4 mb-4">
     <label class="text-[#9090a3] font-bold">Search </label>
     <CustomTextField customWidth="max-w-[120rem]" :isIcon="true" iconSrc="/images/svg/textField_icon.svg" v-model="serverTextInput" placeholder="Enter a keyword (e.g., service Id, serverName, server Label)" />
@@ -101,6 +163,16 @@ import CustomTextField from '../../../components/CustomTextField.vue';
 import PageHeader from '../../../components/PageHeader.vue';
 import { getGlobalLeaderboard } from '../../../service/settings.services';
 const route = useRoute();
+const active = ref(null);
+const menuOpen = ref(false);
+// Toggle the active state for the accordion items
+const toggle = (index) => {
+    if (active.value === index) {
+        active.value = null;
+    } else {
+        active.value = index;
+    }
+};
 
 const globalRanks = ref([]);
 const serverRanks = ref([])
@@ -184,9 +256,36 @@ const sortedLeaderboard = Object.values(leaderboard).sort((a, b) => b.totalKills
         isLoading.value = false; // Stop the loader after the API call
     }
 });
+
+const AUTH_URL = import.meta.env.VITE_APP_REDIRECT_URL;
+const login = () => {
+    console.log('Logging in with Discord...');
+    console.log(AUTH_URL);
+    window.location.href = AUTH_URL;
+};
 </script>
 
 <style scoped>
+
+header {
+  background-image: url('/images/png/cover.bg.png'); /* Replace with your image */
+}
+
+/* Smooth Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out;
+}
 .custom-datatable ::v-deep(.p-datatable-wrapper) {
     background-color: #1e1e2d;
 }
@@ -206,5 +305,6 @@ const sortedLeaderboard = Object.values(leaderboard).sort((a, b) => b.totalKills
 
 .data-cell {
     padding: 10px 0px;
-}
-</style>
+}</style>
+
+
