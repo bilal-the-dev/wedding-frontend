@@ -19,13 +19,14 @@ const initialSurface = () => {
 };
 
 onBeforeMount(() => {
-    document.documentElement.classList.toggle('app-dark');
+    // document.documentElement.classList.toggle('app-dark');
     initialSurface();
     initialPreset();
 });
 </script>
 
 <template>
+    <Taost />
     <router-view />
 </template>
 

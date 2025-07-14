@@ -1,5 +1,5 @@
 
-.env
+
 node_modules
 coverage
 *.log*
@@ -7,7 +7,7 @@ coverage
 .nitro
 .cache
 .output
-.env
+
 dist
 .DS_Store
 .idea
