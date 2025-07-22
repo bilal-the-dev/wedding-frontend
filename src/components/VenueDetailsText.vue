@@ -13,23 +13,28 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block font-semibold mb-1">Customer Name</label>
-                    <InputText v-model="customerName" class="w-full" />
+                    <InputText v-model="customerName" class="w-full" :disabled="isSubmitting" />
                 </div>
                 <div>
-                    <label class="block font-semibold mb-1">Customer Number</label>
-                    <InputText v-model="customerNumber" class="w-full" />
+                    <label class="block font-semibold mb-1">Customer Email</label>
+                    <InputText v-model="customerEmail" type="email" class="w-full" :disabled="isSubmitting" />
                 </div>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1">Customer Number</label>
+                <InputText v-model="customerNumber" class="w-full" :disabled="isSubmitting" />
             </div>
 
             <!-- Guests -->
             <div class="flex items-center justify-between">
                 <label class="font-semibold text-lg">Number of Guests:</label>
                 <div class="flex items-center space-x-3">
-                    <button @click="guests = Math.max(guests - 1, 1)" class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                    <button @click="guests = Math.max(guests - 1, 1)" :disabled="isSubmitting" class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 disabled:opacity-50">
                         <i class="pi pi-minus text-black text-sm"></i>
                     </button>
                     <span class="text-xl font-semibold w-10 text-center">{{ guests }}</span>
-                    <button @click="guests++" class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300">
+                    <button @click="guests++" :disabled="isSubmitting" class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 disabled:opacity-50">
                         <i class="pi pi-plus text-black text-sm"></i>
                     </button>
                 </div>
@@ -39,15 +44,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block font-semibold mb-1">Event Date</label>
-                    <Calendar v-model="startDate" showIcon class="w-full" />
+                    <Calendar v-model="startDate" showIcon class="w-full" :disabled="isSubmitting" />
                 </div>
                 <div>
                     <label class="block font-semibold mb-1">Start Time</label>
-                    <Calendar v-model="startTime" timeOnly hourFormat="24" showIcon class="w-full" />
+                    <Calendar v-model="startTime" timeOnly hourFormat="24" showIcon class="w-full" :disabled="isSubmitting" />
                 </div>
                 <div>
                     <label class="block font-semibold mb-1">End Time</label>
-                    <Calendar v-model="endTime" timeOnly hourFormat="24" showIcon class="w-full" />
+                    <Calendar v-model="endTime" timeOnly hourFormat="24" showIcon class="w-full" :disabled="isSubmitting" />
                 </div>
             </div>
 
@@ -77,7 +82,9 @@
 
             <!-- Checkout Button -->
             <div class="text-center pt-4">
-                <button @click="submitBooking" class="bg-[#FF5A60] hover:bg-[#e04b52] text-white font-semibold px-8 py-3 rounded-lg transition">Proceed to Checkout</button>
+                <button @click="submitBooking" :disabled="isSubmitting" class="bg-[#FF5A60] hover:bg-[#e04b52] text-white font-semibold px-8 py-3 rounded-lg transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    {{ isSubmitting ? 'Processing...' : 'Proceed to Checkout' }}
+                </button>
             </div>
         </div>
     </section>
@@ -110,11 +117,13 @@ const toast = useToast();
 
 // Form Fields
 const customerName = ref('');
+const customerEmail = ref('');
 const customerNumber = ref('');
 const guests = ref(1);
 const startDate = ref(null);
 const startTime = ref(null);
 const endTime = ref(null);
+const isSubmitting = ref(false);
 
 // Booking Summary
 const totalHours = computed(() => {
@@ -134,21 +143,29 @@ const parsedDescription = computed(() => (props.description ? marked.parse(props
 
 // Submit Booking
 const submitBooking = async () => {
-    if (!customerName.value || !customerNumber.value || !startDate.value || !startTime.value || !endTime.value) {
-        toast.add({ severity: 'warn', summary: 'Missing Fields', detail: 'Please fill out all fields', life: 3000 });
+    if (!customerName.value || !customerEmail.value || !customerNumber.value || !startDate.value || !startTime.value || !endTime.value) {
+        toast.add({ severity: 'warn', summary: 'Missing Fields', detail: 'Please fill out all fields including email', life: 3000 });
         return;
     }
 
-    console.log('jere');
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerEmail.value)) {
+        toast.add({ severity: 'warn', summary: 'Invalid Email', detail: 'Please enter a valid email address', life: 3000 });
+        return;
+    }
+
+    isSubmitting.value = true;
+
     const eventTime = new Date(startDate.value);
     eventTime.setHours(new Date(startTime.value).getHours());
     eventTime.setMinutes(new Date(startTime.value).getMinutes());
 
     try {
-        console.log(props.venueId);
         const res = await axiosInstance.post('/booking/create', {
             venueId: props.venueId,
             customerName: customerName.value,
+            customerEmail: customerEmail.value,
             customerNumber: customerNumber.value,
             guests: guests.value,
             eventTime,
@@ -157,10 +174,16 @@ const submitBooking = async () => {
             status: 'pending'
         });
 
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Booking Created Successfully', life: 3000 });
+        toast.add({
+            severity: 'success',
+            summary: 'Booking Created!',
+            detail: 'Confirmation email sent to your address',
+            life: 5000
+        });
 
-        // Optional: Reset form
+        // Reset form
         customerName.value = '';
+        customerEmail.value = '';
         customerNumber.value = '';
         guests.value = 1;
         startDate.value = null;
@@ -168,7 +191,14 @@ const submitBooking = async () => {
         endTime.value = null;
     } catch (err) {
         console.error(err);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to create booking', life: 3000 });
+        toast.add({
+            severity: 'error',
+            summary: 'Booking Failed',
+            detail: err.response?.data?.message || 'Failed to create booking',
+            life: 5000
+        });
+    } finally {
+        isSubmitting.value = false;
     }
 };
 </script>

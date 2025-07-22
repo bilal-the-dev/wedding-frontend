@@ -8,6 +8,18 @@
             <NavBar />
             <div class="mx-8 pt-6">
                 <Header />
+                <div class="my-8 px-4 md:px-0 max-w-5xl mx-auto">
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <input v-model="searchQuery" type="text" placeholder="Search venues by name" class="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5A60]" />
+
+                        <select v-model="selectedCity" class="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF5A60]">
+                            <option value="">Filter by City</option>
+                            <option v-for="city in cities" :key="city" :value="city">
+                                {{ city }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
                 <VenueList v-for="(venues, category) in groupedVenues" :key="category" :venues="venues" :viewMoreLink="getLink(category)" :text="category" :subtitle="getSubtitle(category)" />
 
                 <!-- CTA Section with Image Background -->
@@ -34,7 +46,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import Footer from '../components/Footer.vue';
 import Header from '../components/Header.vue';
 import NavBar from '../components/NavBar.vue';
@@ -45,7 +57,32 @@ import axiosInstance from '../service/api';
 const hasVisited = typeof window !== 'undefined' ? localStorage.getItem('hasVisited') : null;
 const showPreloader = ref(hasVisited !== 'true');
 const groupedVenues = ref({}); // { Weddings: [...], Seminars: [...] }
+const searchQuery = ref('');
+const selectedCity = ref('');
+const cities = [
+    'Lahore',
+    'Karachi',
+    'Islamabad',
+    'Rawalpindi',
+    'Faisalabad',
+    'Multan',
+    'Peshawar',
+    'Quetta',
+    'Hyderabad',
+    'Sialkot',
+    'Gujranwala',
+    'Bahawalpur',
+    'Sargodha',
+    'Abbottabad',
+    'Sukkur',
+    'Mardan',
+    'Mirpur',
+    'Gilgit',
+    'Skardu',
+    'Rahim Yar Khan'
+];
 
+const allVenues = ref([]);
 function getLink(category) {
     const subtitles = {
         Wedding: '/category/wedding',
@@ -75,34 +112,16 @@ function preloaderRemoved() {
 async function fetchVenues() {
     try {
         const res = await axiosInstance.get('/venue/all');
-
-        const venues = res.data;
-
-        const categoryMap = {};
-
-        venues.forEach((venue) => {
-            if (venue.category && Array.isArray(venue.category)) {
-                venue.category.forEach((cat) => {
-                    if (!categoryMap[cat]) categoryMap[cat] = [];
-                    if (categoryMap[cat].length < 4) {
-                        categoryMap[cat].push({
-                            id: venue._id,
-                            title: venue.venueName,
-                            image: venue.venueImages?.[0] ? `http://localhost:5000/images/${venue.venueImages[0]}` : '/card-1.png',
-                            address: venue.location,
-                            rating: 4.8, // if you want to make this dynamic later
-                            totalReviews: 100 // placeholder
-                        });
-                    }
-                });
-            }
-        });
-
-        groupedVenues.value = categoryMap;
+        allVenues.value = res.data;
+        filterVenues(); // Call filtering logic after loading
     } catch (err) {
         console.error('Error fetching venues:', err);
     }
 }
+
+watch([searchQuery, selectedCity], () => {
+    filterVenues();
+});
 
 function getSubtitle(category) {
     const subtitles = {
@@ -112,6 +131,35 @@ function getSubtitle(category) {
         Seminars: 'Inspire, educate, and share ideas in venues built for clarity and focus.'
     };
     return subtitles[category] || 'Find the perfect venue for your event.';
+}
+
+function filterVenues() {
+    const categoryMap = {};
+
+    allVenues.value.forEach((venue) => {
+        const matchSearch = searchQuery.value ? venue.venueName.toLowerCase().includes(searchQuery.value.toLowerCase()) : true;
+
+        const matchCity = selectedCity.value ? venue.location?.toLowerCase().includes(selectedCity.value.toLowerCase()) : true;
+
+        if (matchSearch && matchCity && venue.category && Array.isArray(venue.category)) {
+            venue.category.forEach((cat) => {
+                if (!categoryMap[cat]) categoryMap[cat] = [];
+
+                if (categoryMap[cat].length < 4) {
+                    categoryMap[cat].push({
+                        id: venue._id,
+                        title: venue.venueName,
+                        image: venue.venueImages?.[0] ? `http://localhost:5000/images/${venue.venueImages[0]}` : '/card-1.png',
+                        address: venue.location,
+                        rating: 4.8,
+                        totalReviews: 100
+                    });
+                }
+            });
+        }
+    });
+
+    groupedVenues.value = categoryMap;
 }
 </script>
 

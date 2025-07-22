@@ -140,7 +140,7 @@ const viewMoreLink = '/weddings';
         </section>
 
         <Crousal v-if="venue" :images="venue.venueImages.map((img) => `http://localhost:5000/images/${img}`)" />
-        <VenueDetailsText :description="venue?.eventDescription" :venue-id="venue?._id" :hourly-rate="venue?.chargesPerHour?.toLocaleString()" />
+        <VenueDetailsText :description="venue?.eventDescription" :venue-id="venue?._id" :hourly-rate="venue?.chargesPerHour" />
 
         <VenueList :venues="relevantVenues" :viewMoreLink="viewMoreLink" text="Relevant Venues" subtitle="Explore similar venues loved by guests across Pakistan." />
         <Footer />

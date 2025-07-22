@@ -37,7 +37,6 @@ const router = createRouter({
         },
         {
             path: '/',
-            meta: { guest: true },
             children: [
                 {
                     path: '/',
@@ -63,22 +62,28 @@ const router = createRouter({
                     path: '/contact',
                     name: 'contact',
                     component: () => import('@/views/pages/Contact.vue')
+                },
+                {
+                    path: '/plan-your-event',
+                    name: 'plan',
+                    component: () => import('@/views/pages/PlanEntries.vue')
                 }
             ]
         },
         {
             path: '/auth',
-            meta: { guest: true },
             children: [
                 {
                     path: '/signup',
                     name: 'auth',
-                    component: () => import('@/views/auth/Signup.vue')
+                    component: () => import('@/views/auth/Signup.vue'),
+                    meta: { guest: true }
                 },
                 {
                     path: '/login',
                     name: 'login',
-                    component: () => import('@/views/auth/Login.vue')
+                    component: () => import('@/views/auth/Login.vue'),
+                    meta: { guest: true }
                 }
             ]
         }
@@ -92,34 +97,21 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    const userId = localStorage.getItem('userId');
-    const isAuthenticated = !!userId;
-    // if (to.matched.some((record) => record.meta.requiresAuth)) {
-    //     if (!isAuthenticated) {
-    //         return next({ name: 'home' });
-    //     }
-    // }
+    const token = localStorage.getItem('token'); // change if using a different key
+    const isAuthenticated = !!token;
 
-    // if (to.path.startsWith('/dashboard')) {
-    //     // Case 1: Exactly '/dashboard' with nothing after
-    //     if (to.path === '/dashboard') {
-    //         return next({ name: 'servers' });
-    //     }
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+    const guestOnly = to.matched.some((record) => record.meta.guest);
 
-    //     // Case 2: Check specific dashboard routes that need IDs
-    //     const pathSegments = to.path.split('/').filter(Boolean); // Remove empty strings
+    if (requiresAuth && !isAuthenticated) {
+        return next({ name: 'login' });
+    }
 
-    //     // If we have a route like /dashboard/products or /dashboard/profile (without an ID)
-    //     if (pathSegments.length === 2 && ['profile', 'plans', 'settings', 'gameserver', 'economySettings', 'leaderboardSettings'].includes(pathSegments[1])) {
-    //         return next({ name: 'servers' });
-    //     }
-
-    //     // Case 3: For the main dashboard/:id route
-    //     if (pathSegments.length === 2 && pathSegments[0] === 'dashboard' && (!to.params.id || to.params.id === '')) {
-    //         return next({ name: 'servers' });
-    //     }
-    // }
+    if (guestOnly && isAuthenticated) {
+        return next({ name: 'dashboard' });
+    }
 
     next();
 });
+
 export default router;

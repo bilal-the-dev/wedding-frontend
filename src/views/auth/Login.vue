@@ -16,7 +16,7 @@
             <!-- Password Input -->
             <div class="mb-6 text-left">
                 <label class="block text-gray-700 mb-1">Password</label>
-                <Password v-model="password" class="w-full" inputClass="w-full" toggleMask placeholder="Enter your password" />
+                <Password v-model="password" class="w-full" inputClass="w-full" toggleMask placeholder="Enter your password" :feedback="false" />
             </div>
 
             <p class="text-sm mt-2 mb-4 text-gray-600">
